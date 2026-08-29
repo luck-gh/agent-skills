@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "selection_policy": {
+    "mapping_role": "advisory_for_implicit_selection",
+    "availability_gate": "current_tool_schema",
+    "supported_explicit_unmapped": "allowed",
+    "unsupported_explicit": "refused",
+    "unmapped_implicit": "omitted"
+  },
+  "models": [
+    {
+      "model_id": "gpt-5.6-sol",
+      "display_name": "GPT-5.6 Sol",
+      "default_level_id": "L4",
+      "task_profile_ids": [
+        "strategic-control",
+        "cross-branch-decision"
+      ],
+      "default_reasoning_profile_id": "deep",
+      "availability": "schema-gated",
+      "source_ids": [
+        "runtime-contract",
+        "local-routing-policy"
+      ]
+    },
+    {
+      "model_id": "gpt-5.6-terra",
+      "display_name": "GPT-5.6 Terra",
+      "default_level_id": "L3",
+      "task_profile_ids": [
+        "branch-coordination",
+        "dependency-integration",
+        "complex-review",
+        "browser-debugging"
+      ],
+      "default_reasoning_profile_id": "deep",
+      "availability": "schema-gated",
+      "source_ids": [
+        "runtime-contract",
+        "official-subagent-model-guidance",
+        "local-routing-policy"
+      ]
+    },
+    {
+      "model_id": "gpt-5.3-codex-spark",
+      "display_name": "GPT-5.3 Codex Spark",
+      "default_level_id": "L2",
+      "task_profile_ids": [
+        "read-only-code-exploration",
+        "targeted-code-change",
+        "focused-refactor-test",
+        "granular-ui-iteration"
+      ],
+      "default_reasoning_profile_id": "balanced",
+      "availability": "schema-gated",
+      "source_ids": [
+        "official-subagent-model-guidance",
+        "local-routing-policy"
+      ]
+    },
+    {
+      "model_id": "gpt-5.6-luna",
+      "display_name": "GPT-5.6 Luna",
+      "default_level_id": "L1",
+      "task_profile_ids": [
+        "bounded-scan",
+        "documentation-research",
+        "code-mapping",
+        "repeatable-validation",
+        "high-volume-clear-work"
+      ],
+      "default_reasoning_profile_id": "balanced",
+      "availability": "schema-gated",
+      "source_ids": [
+        "runtime-contract",
+        "official-subagent-model-guidance",
+        "local-routing-policy"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "runtime-contract",
+      "kind": "tool-schema",
+      "location": "current-tool-schema"
+    },
+    {
+      "source_id": "official-subagent-model-guidance",
+      "kind": "official-documentation",
+      "location": "https://learn.chatgpt.com/docs/agent-configuration/subagents"
+    },
+    {
+      "source_id": "local-routing-policy",
+      "kind": "skill-policy",
+      "location": "references/routing.md"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "沉淀个人知识"
+  short_description: "在 note,memory,no-save 间决策并控制隐私与写入"
+  default_prompt: "使用 $capture-personal-knowledge 判断经验是否值得吸收,选择 note,memory 或 no-save,并按当轮写入意图执行相应的隐私与事务门禁."

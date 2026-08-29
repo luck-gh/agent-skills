@@ -1,0 +1,4 @@
+interface:
+  display_name: "纯总控多承载编排"
+  short_description: "按用户指定或最小影响的承载方式协调,等待,决策和验收"
+  default_prompt: "使用 $orchestrate-subagents 按用户指定或最小影响的承载方式进行纯总控编排,只负责路由,等待,决策和验收."

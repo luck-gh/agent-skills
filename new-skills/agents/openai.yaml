@@ -1,0 +1,4 @@
+interface:
+  display_name: "通用 Skill 生命周期"
+  short_description: "统一 Skill 创建,迁移,更新检查,安全升级,分发与验收"
+  default_prompt: "使用 $new-skills 完成 Skill 生命周期变更或检查与安全升级已安装 Skill,并按目标平台契约验证结构,metadata,settings 和独立分发."

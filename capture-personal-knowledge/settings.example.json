@@ -1,0 +1,15 @@
+{
+  "collections": [
+    {
+      "id": "<collection-id>",
+      "root": "<absolute-existing-directory>",
+      "scope": {
+        "include": [
+          "<root-relative-posix-directory>"
+        ],
+        "exclude": []
+      },
+      "format_profile": "plain-v1"
+    }
+  ]
+}

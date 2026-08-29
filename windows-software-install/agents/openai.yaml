@@ -1,0 +1,4 @@
+interface:
+  display_name: "Windows 大型软件安装"
+  short_description: "只读审计并安全规划,安装,升级与修复大型 Windows 软件"
+  default_prompt: "Use $windows-software-install to audit, plan, install, upgrade, or repair a Windows application with verified sources, bounded execution, and D-drive path controls."

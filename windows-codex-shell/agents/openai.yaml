@@ -1,0 +1,4 @@
+interface:
+  display_name: "Windows Codex Shell"
+  short_description: "诊断 Windows helper,工具启动,sandbox 与 Git 所有权异常"
+  default_prompt: "使用 $windows-codex-shell 诊断已观察到的 Windows helper,工具启动,sandbox 或 Git 所有权异常,或只读核对我明确指定的特殊文件."

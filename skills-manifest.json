@@ -1,0 +1,281 @@
+{
+  "content_sha256": "120e79518eb8345237f4c19518faf0d5bde90cf930885e045dd91d34a3c6ce05",
+  "generated_at": "2026-08-29T09:51:39Z",
+  "repository": "luck-gh/agent-skills",
+  "schema_version": 1,
+  "skills": {
+    "capture-personal-knowledge": {
+      "content_sha256": "cd3222e8025e75fa544d8751886bbf0e2d3b8f79f7d86b2cd9b70d8f88b2c03f",
+      "files": [
+        {
+          "path": ".gitignore",
+          "sha256": "93f6c4263173754f9f1abf54d2604308fba0a8aceb7b03de4fbc9fb5c4459972"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "fe073eeadbbf879ed506d7456df01b582be945714ff8d0852cb591aba1eb9f0d"
+        },
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "4375aabacef09683a88daeb76ec9f270da513d2881078030c7a128f380bdeacc"
+        },
+        {
+          "path": "references/capture-plan-contract.md",
+          "sha256": "a08f8ee7076fef26165fea42027f5fef131ed4cd0d65b73a2d9ac241f2c15a99"
+        },
+        {
+          "path": "references/local-settings.md",
+          "sha256": "dc62395b0535e9686afa842930ac4cc343e045c4f48862ca886d7c9a596884a5"
+        },
+        {
+          "path": "scripts/validate_collections.py",
+          "sha256": "ca5b81b9067d2f074f1c0f53fca15bbf728971adf9daee13321bd7d1b262e303"
+        },
+        {
+          "path": "scripts/validate_note_plan.py",
+          "sha256": "fdd66a8bcae141dfdb49340a148b1bc781fbfad9e86ac6584e6f8ec833adaffe"
+        },
+        {
+          "path": "settings.example.json",
+          "sha256": "8d963582a0bbf6729ed8ec8608840aff7504b22a6912652e346349b304c9ac73"
+        },
+        {
+          "path": "src/candidate_contract_v1.py",
+          "sha256": "6db08cfd22ad23efd48e57e81abc25ca4356ed10b32f9ae86e1f1b3de24bacaa"
+        },
+        {
+          "path": "src/transaction_executor.py",
+          "sha256": "feb7f3edf753db264fae22696d13e0f516bfcfdaf237fe3f41093806c01ab090"
+        },
+        {
+          "path": "src/validate_collections.py",
+          "sha256": "2c1b5ebdae4af6c98cb8ede113b27f30fb814d5baea9edaff478c1c6d9ca3315"
+        },
+        {
+          "path": "src/validate_note_plan.py",
+          "sha256": "05a44b381575590e39050a968169f8316a6a4dada3c1aa746fcb4623ebc8ae91"
+        },
+        {
+          "path": "tests/test_capture_workflow.py",
+          "sha256": "323ea5e6d295d8615df5cf7e0a2025fac527d8bd65c9ca0996e17028fa822f4e"
+        }
+      ],
+      "path": "capture-personal-knowledge"
+    },
+    "markdown-note-format": {
+      "content_sha256": "c6e1243b17078c433c11eae42c1bd3c73dbbd06acf61a482a71b58f871c22a49",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "5849f033ee95d52932bdcd1ca69bd46a2022ffa7fcf0a76c0f1d4e371a5e4222"
+        },
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "8d43b49c3262a2b894beb16fa6aae63122ae8d39b486b84e8531327591eca457"
+        },
+        {
+          "path": "references/candidate-response-v1.md",
+          "sha256": "4ffa6dbe544bb1d6188d0fe155734dddd23bceb7b62a535be35f3d671bdaf2bc"
+        },
+        {
+          "path": "references/extended-syntax.md",
+          "sha256": "b5dee52b0c615f3ff2091200dbb488e3dc0f959c74fe209e04daa336f6f9ccdc"
+        },
+        {
+          "path": "references/format-rules.md",
+          "sha256": "7c13a23d9f7250be3b28390801b6af3165c8853fbe80bef8ba9f7228f8703eac"
+        }
+      ],
+      "path": "markdown-note-format"
+    },
+    "new-skills": {
+      "content_sha256": "2b4ca0dfd67f3c9508e88c2d99a3cb6f33bbe9c7523f4445b7cd310377e36940",
+      "files": [
+        {
+          "path": ".gitignore",
+          "sha256": "93f6c4263173754f9f1abf54d2604308fba0a8aceb7b03de4fbc9fb5c4459972"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "adcd1fcc726582c64d55cf067a82b7bf812c97a2dff59dff690cdb5ae9c4ba20"
+        },
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "378224ea06773b29dcbf6c7e9fba49e4650386979aff228a8e024687cf2161a7"
+        },
+        {
+          "path": "references/junction-safety.md",
+          "sha256": "0238e05a3197f5763e7b347877f2af8d8c6fe8de0a5c089d670a33a90e961fb0"
+        },
+        {
+          "path": "references/local-settings.md",
+          "sha256": "02375d9d7bdff8a5935c21168b2bc923af46f71796736a1c5ee9cf8077d055ea"
+        },
+        {
+          "path": "references/repository-updates.md",
+          "sha256": "e4737bca241597808e372c1550db480c8b772c8a2e122c57ba61a9697f159d82"
+        },
+        {
+          "path": "references/validation-contract.md",
+          "sha256": "b5943e7edfaa96a700b843e7c5c95b9651d4c547df15745c6e4320c095a2827d"
+        },
+        {
+          "path": "scripts/check_content_style.py",
+          "sha256": "4819e7507c4da69d61df6c89b4c9ce9abcc3644e96383a2b1f0cb9a885258c00"
+        },
+        {
+          "path": "scripts/ensure_skill_entry.py",
+          "sha256": "715044753b4e63333c343f559d57e7430c5cf68926f8a25c372545abe1acc05b"
+        },
+        {
+          "path": "scripts/manage_updates.py",
+          "sha256": "599a4e2afa4007b48699d93e8386c27c5d15d4368df3580c6829397998f208f9"
+        },
+        {
+          "path": "scripts/validate_skill.py",
+          "sha256": "e2db038364c7e88355aed3b91041302cf0bc616912b0fb75afc6bb3bc814ce89"
+        },
+        {
+          "path": "settings.example.json",
+          "sha256": "43a8bbe5e288a1716ab750b025cc19ee50046929e765c1b9c3f328467187c07b"
+        },
+        {
+          "path": "tests/test_manage_updates.py",
+          "sha256": "2cb7b9fc9db0ac0fd2755cdb2695518f2d929e465d2bc892734461372a922fb7"
+        },
+        {
+          "path": "tests/test_skill_tools.py",
+          "sha256": "e381cdbff268b86952ce4ff5f5e959d4598c3f6944416f8e985f05a0484a5da0"
+        }
+      ],
+      "path": "new-skills"
+    },
+    "orchestrate-subagents": {
+      "content_sha256": "2178558bf68155d581384b14d3c54d396f7f6514989ef329fe9518108589d9d3",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "0cedbf807c9003c0826e94c0b7c95b30a7bbf7197ececd7ee0ba74ca11137c57"
+        },
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "60d4e53dce5c47e326ee9de4b4272c554ab5bc7599082abe025f006fc52c671a"
+        },
+        {
+          "path": "references/mixed-carriers.md",
+          "sha256": "26053fec2fc126424e54c6559777fb641cdde004f7fd36bc5eb0c48a4e07bbc8"
+        },
+        {
+          "path": "references/model-routing.json",
+          "sha256": "3b8bb70e1619600063b4323a3ffbf316ed996c50d3c80bf0112acba99c5bbee1"
+        },
+        {
+          "path": "references/new-task-callbacks.md",
+          "sha256": "ec952a569fa94053668dde87cb179ac1e8136a2c55ab76564fb4462d4d9579ae"
+        },
+        {
+          "path": "references/new-tasks.md",
+          "sha256": "ba3e48400627af92450837bae518409be75dba02b6bedb57ca182f337c675362"
+        },
+        {
+          "path": "references/routing.md",
+          "sha256": "d39a17b7f19d3d5ecea229a76c3e98eebab377e08b534870f50e36664598df98"
+        },
+        {
+          "path": "references/subagents.md",
+          "sha256": "1c411ea868dfb67cc3d039cfed2998fcbc70d5149b4273519cbbce6779ffadef"
+        },
+        {
+          "path": "tests/test_model_routing.py",
+          "sha256": "2fe2d2e3a3dfee0763983fa1fed762749b6c8cfadc94f600932b551980e6c890"
+        }
+      ],
+      "path": "orchestrate-subagents"
+    },
+    "windows-codex-shell": {
+      "content_sha256": "81358711e8511203b410da13e0d751d8773ba231975fbbfef1ba359fa04d1273",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "97eb7cf62b4e8ceb25cb539c443aaa510dc663a140e07398823752260a39b808"
+        },
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "8fc52a987bd16ccc77d5fed2ca6e3c9005f12ad6a8ae58f18596c6ae5653b3e5"
+        },
+        {
+          "path": "references/special-files.md",
+          "sha256": "2e983bf1c5acfdbc314f120842d655f1aab4fcf231ea88e8d35db61f26a62065"
+        },
+        {
+          "path": "references/windows-diagnostics.md",
+          "sha256": "6c94f182a6636beb91d8e6fc3dcd36d2c2bd1f4e570696ecd2187a81072de4c3"
+        },
+        {
+          "path": "references/windows-sandbox-setup.md",
+          "sha256": "e9f6cd55ee99ad0b16ee81d129a73de64fea352a12cef419b958c4e648b171a6"
+        },
+        {
+          "path": "scripts/evaluate_windows_shell_evidence.py",
+          "sha256": "487341b17ceb5ca1110ebf9851dbfd052d5100642e025303d6e89dd1be926845"
+        },
+        {
+          "path": "tests/test_evidence_policy.py",
+          "sha256": "8f1969e885d3fc21026929ce9012b393f7561b65da41c22fdc8b5c0b092c70df"
+        }
+      ],
+      "path": "windows-codex-shell"
+    },
+    "windows-software-install": {
+      "content_sha256": "4bc065d404e3fdeb4570c42b6a165e52613ad9ce8c18f41ace4146eac3cda0b8",
+      "files": [
+        {
+          "path": ".gitignore",
+          "sha256": "93f6c4263173754f9f1abf54d2604308fba0a8aceb7b03de4fbc9fb5c4459972"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "054e72c812712a9d5bc7cf7e4248b0c71e1e797e03c626969dc01df54fef2e36"
+        },
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "933497d461b1568c1a69b427c4ab0f9f9bf5c7cd9d4c0c86241d99cc75ac2188"
+        },
+        {
+          "path": "references/execution-and-recovery.md",
+          "sha256": "5ccc60ebfdddecc11fee8bf070de06b0d012f53c9bc0a479bffa7ee02fe20d5c"
+        },
+        {
+          "path": "references/local-settings.md",
+          "sha256": "afe6cd17eb264d17c6bf10d991725ceef87e60336fcd67bc5f57c8cd3f81a037"
+        },
+        {
+          "path": "references/source-and-preflight.md",
+          "sha256": "1947ea8e79cd1d87ca351afa3a049de67ed1a61378bace4f867d0c1678b40e36"
+        },
+        {
+          "path": "references/verification-and-reporting.md",
+          "sha256": "82e00614da5df030412e03130e52579a8ac74bb3787740ca2b9eb414d544aa68"
+        },
+        {
+          "path": "scripts/check_install_roots.py",
+          "sha256": "8673989e82c4da270406a2dee4426126f0e05592e2913ca6e09c25ffb4cee20f"
+        },
+        {
+          "path": "settings.example.json",
+          "sha256": "11bb9190de38d002507a7ab22a745940f28cc1a0e78b15f3c662275e8ac5ac8c"
+        },
+        {
+          "path": "src/check_install_roots.py",
+          "sha256": "69c441be713032e3ee4b69e650056904f0f596de5dccf3a2870748ae5ffc6f64"
+        },
+        {
+          "path": "tests/test_install_roots.py",
+          "sha256": "56894185509ffa7575fc6640184e0bdcdfa76f1b71f3d7a126e4f7d79ca968dd"
+        }
+      ],
+      "path": "windows-software-install"
+    }
+  },
+  "snapshot_id": "20260829T095139Z-120e79518eb83452"
+}

@@ -1,0 +1,4 @@
+{
+  "install_x64": "<absolute-existing-d-drive-directory>",
+  "install_x86": "<absolute-existing-d-drive-directory>"
+}

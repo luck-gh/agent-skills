@@ -1,0 +1,4 @@
+interface:
+  display_name: "Markdown 笔记格式"
+  short_description: "生成或审查不落盘的 Markdown 格式候选与变更计划"
+  default_prompt: "请使用 $markdown-note-format 为调用方提供的内容生成保留原意且不落盘的 Markdown 格式候选与变更计划."
