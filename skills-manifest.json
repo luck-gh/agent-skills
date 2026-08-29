@@ -1,6 +1,6 @@
 {
-  "content_sha256": "120e79518eb8345237f4c19518faf0d5bde90cf930885e045dd91d34a3c6ce05",
-  "generated_at": "2026-08-29T09:51:39Z",
+  "content_sha256": "1d323a2d30a64b2165584d50d21ee14b5ee26bd451a6ea51493e8c8e5ca1320e",
+  "generated_at": "2026-08-29T10:00:02Z",
   "repository": "luck-gh/agent-skills",
   "schema_version": 1,
   "skills": {
@@ -277,5 +277,5 @@
       "path": "windows-software-install"
     }
   },
-  "snapshot_id": "20260829T095139Z-120e79518eb83452"
+  "snapshot_id": "20260829T100002Z-1d323a2d30a64b21"
 }
