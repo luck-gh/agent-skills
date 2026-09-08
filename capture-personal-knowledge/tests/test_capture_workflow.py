@@ -3,10 +3,12 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 def load_script(module_name: str, relative_path: str):
     path = SKILL_ROOT / relative_path
@@ -107,7 +109,8 @@ class CaptureWorkflowTests(unittest.TestCase):
                 "scope": {"include": ["notes/engineering"], "exclude": ["notes/private"]},
                 "format_profile": "plain-v1"}]}
             collection = collections.validate_variables(variables)[0]
-            checked = collections.preflight_collection(collection, require_write=True)
+            checked = collections.preflight_collection(
+                collection, write_scope="notes/engineering")
             self.assertEqual((root / "notes/engineering",), checked.include)
             with self.assertRaises(collections.CollectionConfigurationError):
                 collections.validate_variables({"collections": [{**variables["collections"][0],
@@ -223,6 +226,154 @@ class CaptureWorkflowTests(unittest.TestCase):
             )
             self.assertTrue((root / "notes/engineering/pattern.md").is_file())
             self.assertTrue((root / "notes/engineering/second.md").is_file())
+
+    def test_excluded_target_uses_current_os_case_semantics(self) -> None:
+        for directory in ("private", "PRIVATE", "private-other"):
+            with self.subTest(directory=directory), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                (root / "notes/private").mkdir(parents=True)
+                (root / "notes" / directory).mkdir(exist_ok=True)
+                request, response = self.request_and_response()
+                request["scope"] = "notes"
+                request["operations"][0]["target"] = f"notes/{directory}/pattern.md"
+                request = capture_plan.seal_request(request, ("plain-v1",))
+                response = valid_response(request)
+                collection = collections.CollectionConfig(
+                    "notes", str(root), ("notes",), ("notes/private",), "plain-v1")
+                plan, plan_digest = capture_plan.construct_write_plan(
+                    request=request, response=response,
+                    local_context={"plan_id": "plan-case-001", "collection_id": "notes",
+                        "operation_intents": [{"operation_id": "operation-001",
+                            "operation": "create", "before_hash": None}]},
+                    allowed_format_profiles=("plain-v1",))
+                context = capture_transaction.ExecutionContext(
+                    "notes", capture_transaction.root_fingerprint(str(root)), "notes",
+                    collection.include, collection.exclude)
+                result = capture_transaction.TransactionExecutor().execute(
+                    plan=plan, write_plan_digest=plan_digest,
+                    collection=collection, context=context)[0]
+                blocked = os.path.normcase(directory) == os.path.normcase("private")
+                expected = ("unknown", "operation-binding-invalid") if blocked else (
+                    "published", "verified")
+                self.assertEqual(expected, (result.status, result.code))
+                self.assertEqual(not blocked, (root / "notes" / directory / "pattern.md").exists())
+                self.assertFalse((root / "notes/private/pattern.md").exists())
+
+    def test_write_preflight_limits_permissions_to_target_parent(self) -> None:
+        for denied in ("unrelated-write", "target-write", "excluded-read", "root-traverse"):
+            with self.subTest(denied=denied), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                target_parent = root / "notes/engineering"
+                target_parent.mkdir(parents=True)
+                (root / "notes/reference").mkdir()
+                excluded = root / "notes/private"
+                excluded.mkdir()
+                request, response = self.request_and_response()
+                collection = collections.CollectionConfig(
+                    "notes", str(root), ("notes/engineering", "notes/reference"),
+                    ("notes/private",), "plain-v1")
+                plan, plan_digest = capture_plan.construct_write_plan(
+                    request=request, response=response,
+                    local_context={"plan_id": "plan-access-001", "collection_id": "notes",
+                        "operation_intents": [{"operation_id": "operation-001",
+                            "operation": "create", "before_hash": None}]},
+                    allowed_format_profiles=("plain-v1",))
+                context = capture_transaction.ExecutionContext(
+                    "notes", capture_transaction.root_fingerprint(str(root)), "notes/engineering",
+                    collection.include, collection.exclude)
+                original_access = os.access
+
+                def access(path, mode, *args, **kwargs):
+                    if denied == "unrelated-write" and mode & os.W_OK and Path(path) != target_parent:
+                        return False
+                    if denied == "target-write" and mode & os.W_OK and Path(path) == target_parent:
+                        return False
+                    if denied == "excluded-read" and mode & os.R_OK and Path(path) == excluded:
+                        return False
+                    if denied == "root-traverse" and mode & os.X_OK and Path(path) == root:
+                        return False
+                    return original_access(path, mode, *args, **kwargs)
+
+                with patch.object(collections.os, "access", side_effect=access):
+                    result = capture_transaction.TransactionExecutor().execute(
+                        plan=plan, write_plan_digest=plan_digest,
+                        collection=collection, context=context)[0]
+                allowed = denied == "unrelated-write"
+                expected = ("published", "verified") if allowed else (
+                    "unknown", "collection-location-unavailable")
+                self.assertEqual(expected, (result.status, result.code))
+                self.assertEqual(allowed, (target_parent / "pattern.md").exists())
+
+    @unittest.skipUnless(os.name == "nt", "Windows 8.3 path aliases require Windows")
+    def test_windows_short_directory_alias_cannot_bypass_exclude(self) -> None:
+        import ctypes
+
+        short_path = ctypes.windll.kernel32.GetShortPathNameW
+        short_path.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint]
+        short_path.restype = ctypes.c_uint
+        for excluded_name in ("long", "short", "sibling"):
+            with self.subTest(excluded_name=excluded_name), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                directory = root / "notes/private-long-name"
+                directory.mkdir(parents=True)
+                (root / "notes/other").mkdir()
+                buffer = ctypes.create_unicode_buffer(32768)
+                size = short_path(str(directory), buffer, len(buffer))
+                if not size or size >= len(buffer):
+                    self.skipTest("GetShortPathNameW is unavailable for the isolated fixture")
+                alias = Path(buffer.value).name
+                if os.path.normcase(alias) == os.path.normcase(directory.name):
+                    self.skipTest("The temporary volume does not generate 8.3 aliases")
+                exclude = directory.name if excluded_name == "long" else (
+                    alias if excluded_name == "short" else "other")
+                target_directory = directory.name if excluded_name == "short" else alias
+                request, response = self.request_and_response()
+                request["scope"] = "notes"
+                request["operations"][0]["target"] = f"notes/{target_directory}/pattern.md"
+                request = capture_plan.seal_request(request, ("plain-v1",))
+                response = valid_response(request)
+                collection = collections.CollectionConfig(
+                    "notes", str(root), ("notes",), (f"notes/{exclude}",), "plain-v1")
+                plan, plan_digest = capture_plan.construct_write_plan(
+                    request=request, response=response,
+                    local_context={"plan_id": "plan-alias-001", "collection_id": "notes",
+                        "operation_intents": [{"operation_id": "operation-001",
+                            "operation": "create", "before_hash": None}]},
+                    allowed_format_profiles=("plain-v1",))
+                context = capture_transaction.ExecutionContext(
+                    "notes", capture_transaction.root_fingerprint(str(root)), "notes",
+                    collection.include, collection.exclude)
+                result = capture_transaction.TransactionExecutor().execute(
+                    plan=plan, write_plan_digest=plan_digest,
+                    collection=collection, context=context)[0]
+                allowed = excluded_name == "sibling"
+                expected = ("published", "verified") if allowed else (
+                    "unknown", "collection-location-unavailable")
+                self.assertEqual(expected, (result.status, result.code))
+                self.assertEqual(allowed, (directory / "pattern.md").exists())
+                self.assertFalse(list(root.rglob(".capture-*.tmp")))
+
+    def test_canonical_preflight_rejects_resolved_alias_into_exclude(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            excluded = root / "notes/private-long-name"
+            alias = root / "notes/alias"
+            excluded.mkdir(parents=True)
+            alias.mkdir()
+            collection = collections.CollectionConfig(
+                "notes", str(root), ("notes",), ("notes/private-long-name",), "plain-v1")
+            original_realpath = os.path.realpath
+
+            def realpath(path, *args, **kwargs):
+                resolved = Path(original_realpath(path, *args, **kwargs))
+                if resolved.is_relative_to(alias):
+                    return str(excluded / resolved.relative_to(alias))
+                return str(resolved)
+
+            with patch.object(collections.os.path, "realpath", side_effect=realpath):
+                with self.assertRaises(collections.CollectionConfigurationError):
+                    collections.preflight_collection(collection, write_scope="notes/alias")
+            self.assertFalse(list(root.rglob("*.md")))
 
     def test_transport_contract_rejects_escape_authorization_and_digest_drift(self) -> None:
         expected = {

@@ -249,6 +249,62 @@ class EvidencePolicyTests(unittest.TestCase):
         self.assertTrue(result["repair_complete"])
         self.assertEqual(result["failed_validations"], [])
 
+    def test_invalid_gate_types_are_rejected_without_truthiness_coercion(self) -> None:
+        cases = (
+            {"sandbox_start_results": ["false", "false", "false"]},
+            {"sandbox_start_results": "true"},
+            {"sandbox_start_results": [True, 1, True]},
+            {"write_ace_grant_failed": "false"},
+            {"windows_admin_token_required": "false"},
+            {"host_action_allowed": 1},
+            {"repair_target_is_resolved": None},
+            {"set_named_security_info_error": 5.0},
+            {"repair_processed_count": False},
+            {"narrow_powershell_fallback_attempts": -1},
+            {"narrow_powershell_fallback_attempts": False},
+            {"narrow_powershell_fallback_attempts": "0"},
+            {"latest_setup_errors": None},
+            {"post_state": "unrecognized"},
+            {"authorization_level": ["repair_execution"]},
+        )
+        for values in cases:
+            with self.subTest(fields=tuple(values)), self.assertRaises(ValueError):
+                evaluate_evidence({**self.repair_ready(), **self.completed_validation(), **values})
+
+    def test_unknown_or_partial_write_blocks_completion_and_execution_handoff(self) -> None:
+        for state in ("unknown", "partial"):
+            with self.subTest(state=state):
+                result = evaluate_evidence({
+                    **self.repair_ready(), **self.completed_validation(),
+                    "authorization_level": "repair_execution", "write_operation": True,
+                    "helper_unknown_error": True, "post_state": state,
+                })
+                self.assertIn("unknown_outcome", result["categories"])
+                self.assertFalse(result["repair_complete"])
+                self.assertFalse(result["repair_plan_allowed"])
+                self.assertFalse(result["repair_execution_handoff_allowed"])
+                self.assertEqual(result["next_action"], "check_post_state_without_replay")
+
+    def test_successful_tail_requires_three_actual_boolean_successes(self) -> None:
+        result = evaluate_evidence({**self.completed_validation(), "sandbox_start_results": [False, True, True, True]})
+        self.assertTrue(result["repair_complete"])
+
+    def test_unresolved_write_blocks_handoff_without_helper_error_evidence(self) -> None:
+        for state in ("unknown", "partial", None):
+            for flags in ({}, {"helper_error": False, "helper_unknown_error": False}):
+                with self.subTest(state=state, flags=flags):
+                    evidence = {
+                        **self.repair_ready(), **self.completed_validation(), **flags,
+                        "authorization_level": "repair_execution", "write_operation": True,
+                    }
+                    if state is not None:
+                        evidence["post_state"] = state
+                    result = evaluate_evidence(evidence)
+                    self.assertIn("unknown_outcome", result["categories"])
+                    self.assertFalse(result["repair_complete"])
+                    self.assertFalse(result["repair_execution_handoff_allowed"])
+                    self.assertEqual(result["next_action"], "check_post_state_without_replay")
+
     def test_file_write_without_write_dac_is_dacl_capability_gap(self) -> None:
         result = evaluate_evidence(
             {"ordinary_file_write_success": True, "write_dac_available": False}

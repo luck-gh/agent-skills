@@ -1,0 +1,3 @@
+# CPython 3.12 Windows x86-64 wheels; upstream PyPI; both MIT.
+tree-sitter==0.26.0 --hash=sha256:ca89e361a276dbc934b28a43dd881199e25d34ff5493ee0ce45f3c52a6124a37
+tree-sitter-c==0.24.2 --hash=sha256:abb549225091f7b25df2dd3a0143ece6e208f7055d8bcb4700b41ee79b9ef1e1

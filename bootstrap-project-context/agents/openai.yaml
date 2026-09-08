@@ -1,0 +1,4 @@
+interface:
+  display_name: "建立项目上下文基线"
+  short_description: "建立新项目或首次接管的可信文档基线,并按明确请求校准项目方向与指定文档"
+  default_prompt: "使用 $bootstrap-project-context 按我的请求建立或补齐项目文档基线,或显式校准项目方向与指定文档;仅要求分析时不写入,不继续编码."

@@ -105,6 +105,8 @@ Codex sandbox 账户已经获得所需 ACE
 
 ## 修复后验证
 
+结构化证据脚本只接受 JSON 原生布尔,非负整数计数和明确类型的数组,拒绝字符串 `"false"`,数字 `1` 或 `null` 代替布尔.未知字段或非法类型返回错误,不生成允许修复或完成结果.`sandbox_start_results` 是按时间排列的布尔数组;`post_state` 使用 `unknown|completed|not_started|partial`,缺失按 unknown 处理.当前写入仍为 unknown/partial 时,其他成功事实不能覆盖它,不得生成执行 handoff 或报告修复完成.
+
 全部验证都在普通,非提权路径完成,并分别记录 setup,runner,目标命令,文件写入和写后内容:
 
 1. 连续 3 次启动普通非提权最小 sandbox 进程;任一次失败都重新开始连续计数,不能判定稳定修复.

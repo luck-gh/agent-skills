@@ -1,0 +1,6 @@
+interface:
+  display_name: "人物思维蒸馏"
+  short_description: "蒸馏与推荐人物思维模型,显式思维风暴时自主选模,比较质疑并选择方案"
+  default_prompt: "使用 $distill-person-thinking,根据当前对话推荐最适合的可用思维模型,说明具体用途与局限."
+policy:
+  allow_implicit_invocation: true

@@ -1,6 +1,6 @@
 ---
 name: windows-codex-shell
-description: 诊断 Windows Codex shell 中已观察到的 helper,外部工具启动,sandbox 执行或写入以及 Git dubious ownership 异常,并只读核对用户明确指定的 junction,reparse point 等特殊文件状态或评估复杂目录操作风险.仅在实际出现 helper_unknown_error,工具被 Windows 拒绝启动,sandbox 结果不确定,Git 明确报告 dubious ownership,或用户明确要求检查特殊文件时使用;普通读取,搜索和 Git 查询不要触发.
+description: 诊断 Windows Codex shell 已出现的 helper/helper_unknown_error,外部工具启动失败,sandbox 执行或写入结果不确定及 Git dubious ownership;也用于用户明确要求的 Junction/reparse point 等特殊文件只读核对或复杂目录操作风险评估.不用于普通读取,搜索或 Git 查询.
 ---
 
 # Windows Codex Shell
@@ -36,11 +36,11 @@ description: 诊断 Windows Codex shell 中已观察到的 helper,外部工具�
 - WindowsApps 内 bundled 工具拒绝启动仍走 `tool_start_failure`,不与 setup refresh 失败合并.
 - 用户明确指定 junction,symbolic link,reparse point,或请求评估复杂目录,跨卷,链接边界风险时,读取 [references/special-files.md](references/special-files.md).
 - 两类问题同时存在时分别取证;不要用一类证据推断另一类结论或授权.
-- 需要对已脱敏的最小证据执行一致分类,检查修复门禁或判定连续验证时,运行 [scripts/evaluate_windows_shell_evidence.py](scripts/evaluate_windows_shell_evidence.py).该脚本不读取真实日志,不修改 ACL,不启动 UAC,也不调用 helper.
+- 需要对已脱敏的最小证据执行一致分类,检查 sandbox setup 的 ACL 修复门禁或判定连续验证时,运行 [scripts/evaluate_windows_shell_evidence.py](scripts/evaluate_windows_shell_evidence.py).该脚本不读取真实日志,不修改 ACL,不启动 UAC,也不调用 helper;普通工具恢复和 Git ownership 修复按各自分支验收.
 
 ## 完成条件
 
 - 对诊断任务,重跑仍安全且必要的最小只读检查,只报告可观察事实与未消除的不确定性.
 - 对写操作的 unknown outcome,先只读核对 post-state;仍无法证明是否完成或部分完成时停止,不重放.
-- 只有 setup refresh,command runner,目标命令,精确文件读写和写后状态都分别满足对应验证要求,且普通非提权 sandbox 最小进程连续 3 次成功时,才能声称修复完成;一次成功不能替代连续验证.
+- 按故障分支完成对应验证: sandbox setup 修复需 setup,runner,目标命令,精确文件读写和写后状态分别通过,并有普通非提权 sandbox 最小进程连续 3 次成功.独立工具启动或 Git ownership 问题只要求对应分支证据;两类问题并存时分别报告,不以其中一类恢复替代另一类.
 - 编辑本 skill 时运行官方 `quick_validate.py` 和专属测试;quick validation 只证明基础结构,不证明 Windows 运行时或审批安全.

@@ -57,6 +57,14 @@ class ScopePreflight:
     include: tuple[Path, ...]
     exclude: tuple[Path, ...]
 
+    def allows(self, canonical_path: Path) -> bool:
+        """校验已解析目标的实际位置,包括指向同一目录的短文件名别名."""
+        return (
+            canonical_path.is_relative_to(self.root)
+            and any(canonical_path.is_relative_to(scope) for scope in self.include)
+            and not any(canonical_path.is_relative_to(scope) for scope in self.exclude)
+        )
+
 
 def _invalid() -> CollectionConfigurationError:
     return CollectionConfigurationError(
@@ -183,6 +191,13 @@ def _same_path(left: Path, right: Path) -> bool:
     return os.path.normcase(os.path.abspath(left)) == os.path.normcase(os.path.abspath(right))
 
 
+def scope_contains(path: str, scope: str) -> bool:
+    """按当前操作系统的路径大小写语义比较已校验的相对范围."""
+    path = os.path.normcase(path)
+    scope = os.path.normcase(scope)
+    return path == scope or path.startswith(scope + os.path.normcase("/"))
+
+
 def _available_root(value: Any) -> str:
     if not isinstance(value, str) or not value or len(value) > MAX_STRING_CHARS or _control(value):
         raise _invalid()
@@ -201,10 +216,10 @@ def _available_root(value: Any) -> str:
         or not os.access(candidate, os.R_OK)
     ):
         raise _unavailable()
-    return str(candidate)
+    return str(canonical)
 
 
-def _scope_directory(root: Path, relative: str, *, require_write: bool) -> Path:
+def _scope_directory(root: Path, relative: str) -> Path:
     try:
         canonical_root = Path(os.path.realpath(root))
     except OSError:
@@ -218,36 +233,44 @@ def _scope_directory(root: Path, relative: str, *, require_write: bool) -> Path:
             contained = os.path.commonpath((str(canonical_root), str(canonical))) == str(canonical_root)
         except (OSError, ValueError):
             raise _unavailable() from None
-        access = os.R_OK | os.X_OK | (os.W_OK if require_write else 0)
         if (
             _is_reparse(metadata)
             or not stat.S_ISDIR(metadata.st_mode)
             or not contained
-            or not os.access(current, access)
+            or not os.access(current, os.R_OK | os.X_OK)
         ):
             raise _unavailable()
-    return current
+    return canonical
 
 
 def preflight_collection(
     collection: CollectionConfig,
     *,
-    require_write: bool = False,
+    write_scope: str | None = None,
 ) -> ScopePreflight:
     root_value = _available_root(collection.root)
     root = Path(root_value)
-    root_access = os.R_OK | os.X_OK | (os.W_OK if require_write else 0)
-    if not os.access(root, root_access):
+    if not os.access(root, os.R_OK | os.X_OK):
         raise _unavailable()
     include = tuple(
-        _scope_directory(root, relative, require_write=require_write)
+        _scope_directory(root, relative)
         for relative in collection.include
     )
     exclude = tuple(
-        _scope_directory(root, relative, require_write=require_write)
+        _scope_directory(root, relative)
         for relative in collection.exclude
     )
-    return ScopePreflight(root=root, include=include, exclude=exclude)
+    checked = ScopePreflight(root=root, include=include, exclude=exclude)
+    if write_scope is not None:
+        write_scope = _safe_scope(write_scope)
+        if not any(scope_contains(write_scope, scope) for scope in collection.include) or any(
+            scope_contains(write_scope, scope) for scope in collection.exclude
+        ):
+            raise _invalid()
+        canonical_scope = _scope_directory(root, write_scope)
+        if not checked.allows(canonical_scope) or not os.access(canonical_scope, os.W_OK):
+            raise _unavailable()
+    return checked
 
 
 def validate_variables(value: Any, *, check_locations: bool = True) -> tuple[CollectionConfig, ...]:

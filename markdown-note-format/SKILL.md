@@ -1,6 +1,6 @@
 ---
 name: markdown-note-format
-description: 为调用方已提供的内容生成或审查不落盘的 Markdown 格式候选与变更计划.用于创建,迁移,拆分或修复笔记时规范文件名,目录结构,YAML front matter,taxonomy,正文,图片路径,公式和图表;不发现或读取真实笔记库,不选择源笔记,目标 collection 或 memory backend,不判断知识价值或写入授权,不执行写入.
+description: 为已提供的笔记内容生成或审查不落盘的 Markdown 格式候选与变更计划,支持创建,迁移,拆分和修复中的命名,结构,frontmatter,分类,图片路径及公式图表规范.不读写真实笔记库,不判断知识价值,不选择源笔记或存储目标,不处理写入授权.
 ---
 
 # Markdown 笔记格式候选

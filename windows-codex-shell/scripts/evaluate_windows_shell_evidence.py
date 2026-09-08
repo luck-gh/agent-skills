@@ -20,6 +20,53 @@ from typing import Any
 _UNRESOLVED_VARIABLE = re.compile(r"%[^%]+%|\$\{[^}]+\}|\$[A-Za-z_][A-Za-z0-9_]*")
 
 
+def validate_evidence_input(evidence: Any) -> None:
+    """验证判定使用的直接输入类型; 不把字符串,数字或 null 当成布尔证据."""
+    if not isinstance(evidence, dict):
+        raise ValueError("input_must_be_json_object")
+    boolean_fields = {
+        "write_ace_grant_failed", "ordinary_file_write_success", "write_dac_available",
+        "marker_exists", "marker_readable", "runner_failed", "bundled_tool_access_denied",
+        "write_operation", "helper_error", "helper_unknown_error", "external_execution_success",
+        "sandbox_execution_failure", "logs_complete", "logs_truncated",
+        "logs_too_large_for_bounded_read", "rg_start_failed", "workspace_on_removable_drive",
+        "disk_or_filesystem_error", "repair_target_is_resolved", "exact_failure_object_recorded",
+        "pre_owner_recorded", "pre_dacl_recorded", "write_dac_distinguished", "host_action_allowed",
+        "rollback_basis_recorded", "post_state_verification_defined", "windows_admin_token_required",
+        "visible_uac_confirmed", "runner_success", "target_command_success", "workspace_file_read_success",
+        "git_status_success", "controlled_write_success", "write_content_verified",
+        "git_post_status_verified", "post_acl_verified", "require_escalated_succeeded",
+    }
+    integer_fields = {
+        "set_named_security_info_error", "repair_processed_count", "narrow_powershell_fallback_attempts",
+    }
+    string_fields = {
+        "bundled_tool_location", "repair_target", "repair_target_scope", "authorization_level",
+        "post_state", "setup_error_state",
+    }
+    list_fields = {"setup_errors", "latest_setup_errors", "sandbox_start_results"}
+    if set(evidence) - boolean_fields - integer_fields - string_fields - list_fields:
+        raise ValueError("unknown_evidence_field")
+    for field in sorted(boolean_fields & evidence.keys()):
+        if type(evidence[field]) is not bool:
+            raise ValueError(f"invalid_boolean:{field}")
+    for field in sorted(integer_fields & evidence.keys()):
+        if type(evidence[field]) is not int or evidence[field] < 0:
+            raise ValueError(f"invalid_nonnegative_integer:{field}")
+    for field in sorted(string_fields & evidence.keys()):
+        if not isinstance(evidence[field], str):
+            raise ValueError(f"invalid_string:{field}")
+    for field in sorted(list_fields & evidence.keys()):
+        if not isinstance(evidence[field], list):
+            raise ValueError(f"invalid_array:{field}")
+    if any(type(value) is not bool for value in evidence.get("sandbox_start_results", [])):
+        raise ValueError("invalid_boolean:sandbox_start_results")
+    if evidence.get("authorization_level", "diagnose_only") not in {"diagnose_only", "repair_plan", "repair_execution"}:
+        raise ValueError("invalid_authorization_level")
+    if evidence.get("post_state", "unknown") not in {"unknown", "completed", "not_started", "partial"}:
+        raise ValueError("invalid_post_state")
+
+
 def _append_once(values: list[str], value: str) -> None:
     if value not in values:
         values.append(value)
@@ -71,12 +118,13 @@ def validate_repair_target(
 def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     """根据结构化最小事实返回分类,授权门禁和完成状态."""
 
+    validate_evidence_input(evidence)
     categories: list[str] = []
     missing: list[str] = []
     safety_blocks: list[str] = []
     notes: list[str] = []
 
-    dacl_signature = bool(evidence.get("write_ace_grant_failed")) or (
+    dacl_signature = evidence.get("write_ace_grant_failed") is True or (
         evidence.get("set_named_security_info_error") == 5
     )
     write_dac_gap = (
@@ -103,9 +151,9 @@ def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
         and evidence.get("bundled_tool_location") == "windowsapps"
     ):
         _append_once(categories, "tool_start_failure")
-    if evidence.get("write_operation") is True and evidence.get(
-        "helper_error"
-    ) is True and evidence.get("post_state") in (None, "unknown"):
+    if evidence.get("write_operation") is True and evidence.get("post_state", "unknown") in (
+        "unknown", "partial"
+    ):
         _append_once(categories, "unknown_outcome")
     if evidence.get("external_execution_success") is True and evidence.get(
         "sandbox_execution_failure"
@@ -136,12 +184,11 @@ def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     if evidence_incomplete:
         _append_once(categories, "evidence_incomplete")
         safety_blocks.append("bounded_log_evidence_incomplete")
+    if "unknown_outcome" in categories:
+        safety_blocks.append("write_outcome_unresolved")
 
     rg_start_failed = evidence.get("rg_start_failed") is True
     fallback_attempts = evidence.get("narrow_powershell_fallback_attempts", 0)
-    if not isinstance(fallback_attempts, int) or fallback_attempts < 0:
-        fallback_attempts = 0
-        safety_blocks.append("invalid_fallback_attempt_count")
     powershell_fallback_allowed = rg_start_failed and fallback_attempts == 0
     if rg_start_failed and fallback_attempts >= 1:
         notes.append("narrow_powershell_fallback_already_used")
@@ -178,9 +225,6 @@ def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     ]
 
     authorization = evidence.get("authorization_level", "diagnose_only")
-    if authorization not in {"diagnose_only", "repair_plan", "repair_execution"}:
-        authorization = "diagnose_only"
-        safety_blocks.append("invalid_authorization_level")
 
     uac_required = evidence.get("windows_admin_token_required") is True
     uac_confirmed = evidence.get("visible_uac_confirmed") is True
@@ -202,7 +246,9 @@ def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
             "require_escalated_is_not_admin_proof": True,
         }
 
-    base_repair_gate_passed = not failed_repair_gates and not evidence_incomplete
+    base_repair_gate_passed = (
+        not failed_repair_gates and not evidence_incomplete and "unknown_outcome" not in categories
+    )
     repair_plan_allowed = authorization in {"repair_plan", "repair_execution"} and (
         base_repair_gate_passed
     )
@@ -228,7 +274,7 @@ def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
             evidence.get("sandbox_start_results", [])
         )
         >= 3
-        and all(evidence.get("sandbox_start_results", [])[-3:]),
+        and all(value is True for value in evidence.get("sandbox_start_results", [])[-3:]),
         "latest_setup_errors_empty": evidence.get("latest_setup_errors") == [],
         "runner_success": evidence.get("runner_success") is True,
         "target_command_success": evidence.get("target_command_success") is True,
@@ -249,6 +295,8 @@ def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
         not failed_validations
         and "repair_not_applied" not in categories
         and not evidence_incomplete
+        and "unknown_outcome" not in categories
+        and "unresolved_helper_failure" not in categories
     )
 
     if evidence.get("require_escalated_succeeded") is True and evidence.get(
@@ -319,7 +367,11 @@ def main() -> int:
             )
         )
         return 2
-    result = evaluate_evidence(payload)
+    try:
+        result = evaluate_evidence(payload)
+    except ValueError as error:
+        print(json.dumps({"status": "error", "error": str(error)}, ensure_ascii=False))
+        return 2
     print(json.dumps({"status": "ok", **result}, ensure_ascii=False, indent=2))
     return 0
 

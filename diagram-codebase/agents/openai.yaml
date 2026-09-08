@@ -1,0 +1,6 @@
+interface:
+  display_name: "架构速览与详解"
+  short_description: "分析代码与文档,生成可编辑 draw.io 架构速览和可独立阅读的 Markdown 详解"
+  default_prompt: "使用 $diagram-codebase 分析指定代码或文档,生成简洁的 draw.io 架构速览和包含完整结构,模块接口及关键流程的 Markdown 详解."
+policy:
+  allow_implicit_invocation: true

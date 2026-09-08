@@ -1,0 +1,2 @@
+# CPython 3.12 / Windows x86-64. Source and license: references/initialization.md
+pyslang==11.0.0 --hash=sha256:62200e8766d16e1583ae2dea1994a524ee0e6afa16786a2e73063d335a2c39a8

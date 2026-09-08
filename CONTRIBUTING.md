@@ -1,7 +1,15 @@
-# Contributing
+# 贡献指南
 
-Issues and pull requests are welcome. This repository is a generated public mirror, not its editing source of truth.
+欢迎提交 Issue 和 Pull Request.
 
-Maintainers review accepted public changes, apply them manually to the private source repository, and publish a new generated snapshot. A public pull request may therefore be closed after its change reappears in a later `sync: <snapshot-id>` commit.
+每次变更应限定在一个 Skill 或一个仓库级事项内.请说明使用场景、行为变化、已执行的验证以及新增依赖.每个 Skill 必须保持可独立分发,运行时文件必须位于自身目录内.
 
-Do not include credentials, local `settings.json` files, personal paths, generated caches, links to files outside a Skill, or private repository details.
+不得提交凭据、本机 `settings.json`、个人路径、生成缓存、指向 Skill 外部文件的链接或私有数据.维护者可以在变更发布前调整已接受的贡献.
+
+Pull Request 作为候选补丁审查.接受贡献后,维护者可以在后续发布提交中注明贡献者并纳入变更,随后将对应 Pull Request 关闭为已纳入.Pull Request 分支不保证直接合并到 `main`,以保持发布目录和版本历史确定.
+
+修改 Skill 时,在 `docs/CHANGELOG.md` 顶部新增版本,加入 `## <skill-name> (<中文名称>)` 二级标题,下一行记录 `修改时间: YYYY-MM-DD`,再用连续编号列出实质变化.普通更新递增版本号的第三个数字;只有维护者明确发起正式发布时才递增第二个数字并把第三个数字归零.修改时间使用该 Skill 在本版本中的最后实质修改日期.不要记录实现细节、纯格式调整、测试过程或临时状态.
+
+每个新版本的首个二级章节为唯一的 `## 更新摘要`,正文先写 `fix: ...` 或 `feat: ...` 等准确提交标题,空一行后用简短要点概述本版本变化.正式发布标题使用 `release: 发布 X.Y.Z`,与版本一致.发布提交只采用该摘要,不包含后续 Skill 详情.同一未发布版本原位更新摘要与详情,不因每次编辑递增版本,不改写已发布记录.
+
+新增或删除 Skill,或者改变 Skill 的用途和调用方式时,同时更新 `docs/SKILLS.md`.每个条目应包含 Skill 名称和中文标题、简要用途、对应 `SKILL.md` 链接以及真实使用示例.

@@ -1,0 +1,35 @@
+<mxfile>
+  <diagram id="overview" name="架构速览">
+    <mxGraphModel grid="1" gridSize="10" page="1" pageWidth="1000" pageHeight="600">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="note_purpose" value="示例设计:入口校验请求,处理器转换数据,结果写入存储." style="text;html=0;fontSize=16;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="900" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod_entry" value="入口" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="60" y="160" width="200" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod_processor" value="处理器" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="380" y="160" width="200" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod_store" value="存储" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="700" y="160" width="200" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_process" value="提交请求" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;fontSize=14;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="mod_entry" target="mod_processor">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-16" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_store" value="写入结果" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;fontSize=14;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="mod_processor" target="mod_store">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-16" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="note_legend" value="实线:同步调用.这是用户设计示例,不是已核对的源码架构." style="text;html=0;fontSize=14;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="320" width="840" height="60" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

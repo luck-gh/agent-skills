@@ -6,12 +6,20 @@
 
 ## Inspect
 
+```text
+python -X utf8 -B scripts/ensure_skill_entry.py inspect --physical-dir <physical-dir> --entry-dir <entry-dir> [--validator <validator.py>]
+```
+
 1. 在任何 `resolve` 或 validator 调用前,用 `lstat` 要求 physical dir 是真实目录并拒绝 symlink,Junction 和其他 reparse point.Entry parent 必须存在;目标平台声明 validator 时还要求 validator 文件存在.
 2. 要求 physical dir 与 entry 使用相同的 skill 名,且两条路径不重叠.
 3. 只在调用方提供 `--validator` 时对 physical skill 运行一次平台验证.
 4. Entry 不存在时报告 `absent`;现有 symlink 或 Junction 解析后精确指向 physical dir 时报告 `exact`;其他状态报告冲突.
 
 ## Ensure
+
+```text
+python -X utf8 -B scripts/ensure_skill_entry.py ensure --physical-dir <physical-dir> --entry-dir <entry-dir> [--validator <validator.py>] --authorized
+```
 
 只有当前调用显式提供 `--authorized` 才创建 entry.创建前执行 Inspect 的直接输入检查.
 

@@ -20,6 +20,7 @@ from validate_collections import (
     CollectionConfigurationError,
     FORMAT_PROFILES,
     preflight_collection,
+    scope_contains,
 )
 
 HEX = set("0123456789abcdef")
@@ -117,13 +118,9 @@ def _safe_relative(value: Any) -> bool:
     )
 
 
-def _inside(path: str, scope: str) -> bool:
-    return path == scope or path.startswith(scope + "/")
-
-
 def _collection_allows(path: str, collection: CollectionConfig) -> bool:
-    return any(_inside(path, scope) for scope in collection.include) and not any(
-        _inside(path, scope) for scope in collection.exclude
+    return any(scope_contains(path, scope) for scope in collection.include) and not any(
+        scope_contains(path, scope) for scope in collection.exclude
     )
 
 
@@ -197,7 +194,11 @@ def _metadata_preflight(root_value: str, relative_path: str, operation: str) -> 
             raise RuntimeError("target-type-or-permission-unknown")
     else:
         raise RuntimeError("operation-unsupported")
-    return root, target
+    try:
+        canonical_target = Path(os.path.realpath(target))
+    except OSError as error:
+        raise RuntimeError("target-canonical-unknown") from error
+    return canonical_root, canonical_target
 
 
 def _read_hash(path: Path) -> str:
@@ -316,11 +317,6 @@ class TransactionExecutor:
 
         results: list[ExecutionResult] = []
         for operation in operations:
-            try:
-                preflight_collection(collection, require_write=True)
-            except CollectionConfigurationError:
-                results.append(self._unknown("collection-location-unavailable"))
-                break
             result = self._execute_one(collection, plan["scope"], operation)
             results.append(result)
             if result.status != "published":
@@ -359,7 +355,7 @@ class TransactionExecutor:
             operation["scope"] != plan_scope
             or operation["format_profile"] != collection.format_profile
             or not _safe_relative(relative_path)
-            or not _inside(relative_path, plan_scope)
+            or not scope_contains(relative_path, plan_scope)
             or not _collection_allows(relative_path, collection)
             or op not in {"create", "update"}
             or not isinstance(content, str)
@@ -386,11 +382,19 @@ class TransactionExecutor:
             return self._unknown("update-before-hash-invalid")
 
         try:
+            checked_collection = preflight_collection(
+                collection, write_scope=relative_path.rsplit("/", 1)[0])
+        except CollectionConfigurationError:
+            return self._unknown("collection-location-unavailable")
+
+        try:
             _, target = _metadata_preflight(collection.root, relative_path, op)
         except FileExistsError:
             return ExecutionResult("conflict", "target-exists")
         except RuntimeError as error:
             return self._unknown(str(error))
+        if not checked_collection.allows(target):
+            return self._unknown("target-scope-not-allowed")
 
         if op == "update":
             try:

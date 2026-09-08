@@ -102,6 +102,18 @@ class UpdateTests(unittest.TestCase):
             self.assertEqual("error", forced["status"])
             self.assertTrue(forced["non_blocking"])
 
+    def test_content_hash_ignores_local_runtime_directories(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="update-test-") as temporary:
+            skill = self._skill(Path(temporary), "alpha", "stable")
+            baseline = self.updater.content_hash(skill)
+            local = skill / "tools" / "local"
+            local.mkdir(parents=True)
+            (local / "state.json").write_text("local\n", encoding="utf-8")
+            output = skill / "test-output"
+            output.mkdir()
+            (output / "result.json").write_text("generated\n", encoding="utf-8")
+            self.assertEqual(baseline, self.updater.content_hash(skill))
+
     def test_network_failure_is_recorded_and_non_blocking(self) -> None:
         with tempfile.TemporaryDirectory(prefix="update-test-") as temporary:
             base = Path(temporary)

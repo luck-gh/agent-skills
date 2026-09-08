@@ -1,11 +1,13 @@
 ---
 name: capture-personal-knowledge
-description: 从项目实施,排障过程或聊天记录中判断知识价值,并在 note,memory,no-save 三条路径间选择目标,控制证据,隐私,脱敏,写入意图,写入事务与写后验证.用于用户要求吸收,记住,记录或复盘可复用经验时;只有 note 路径调用 $markdown-note-format,不用于仅格式化已确定的 Markdown 内容.
+description: 在用户要求吸收,记住,记录或复盘项目实施,排障或聊天中的可复用经验时,判断知识价值,选择笔记,记忆或不保存,并按证据,隐私与授权边界处理持久化.不用于仅维护项目本地经验文档或仅格式化已确定的 Markdown 内容.
 ---
 
 # 沉淀个人知识
 
 把用户提供的一次性上下文提炼为可检索,可复用的经验.不要机械复制聊天或日志.把知识价值,source items,目标路由,隐私,目标,写入意图和所有写入状态保留在 Capture.
+
+用户仅要求维护当前项目的 `docs/EXPERIENCE.md` 等指定项目文档时,按项目规则处理并退出本 Skill.该请求不需要个人 collection 配置,也不授权访问个人笔记库.
 
 ## 先决定路由
 
@@ -35,7 +37,7 @@ description: 从项目实施,排障过程或聊天记录中判断知识价值,�
 
 - 每次读取或搜索前调用 `preflight_collection(collection)`.Root 与实际 include/exclude 必须已存在,是目录,可读且可遍历;缺失时返回 `configured_location_unavailable`,不得创建.
 - 从 root 逐段 join scope,逐段 `lstat`,拒绝 symlink/reparse,确认 canonical identity 仍位于 canonical root.不得用目录枚举代替 metadata 检查.
-- 每项副作用前调用 `preflight_collection(collection, require_write=True)`,重新检查 root 与实际 scope 的读,遍历和写权限.一次结果不能复用到下一项;状态未知时 fail closed.
+- 每项副作用前调用 `preflight_collection(collection, write_scope=<target-parent>)`,重新检查 root,配置范围和实际目标父目录的路径类型,读权限与遍历权限,并检查实际目标父目录的写权限.无关 include/exclude 或仅用于遍历的祖先不要求可写.在逐段拒绝链接后,同时用解析后的 canonical root,include,exclude,目标父目录和完整目标核对实际范围;文本比较采用当前操作系统的大小写语义,不能仅凭文本允许判断或 root containment 接受目标,也不能让大小写或 Windows 短文件名别名绕过排除.一次结果不能复用到下一项;状态未知时 fail closed.
 
 ## 撤销与交付
 

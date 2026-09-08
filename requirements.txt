@@ -1,0 +1,4 @@
+# 仓库通用的 Python 辅助脚本与 Skill 校验基础依赖.
+# 已验证解释器: CPython 3.12.4 / Windows x86-64.兼容范围见 README.md.
+# 可选语言解析器使用各自带 hash 的 TXT 锁文件,安装方式见 README.md.
+PyYAML==6.0.2

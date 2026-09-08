@@ -92,7 +92,7 @@
     {
       "source_id": "local-routing-policy",
       "kind": "skill-policy",
-      "location": "references/routing.md"
+      "location": "references/model-selection.md"
     }
   ]
 }

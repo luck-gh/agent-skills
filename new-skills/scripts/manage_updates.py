@@ -33,8 +33,9 @@ PUBLIC_REPOSITORY = "luck-gh/agent-skills"
 MANIFEST_URL = "https://raw.githubusercontent.com/luck-gh/agent-skills/main/skills-manifest.json"
 INSTALLER_VERSION = "1.5.21"
 TTL = timedelta(hours=24)
-IGNORED_NAMES = {"settings.json", "__pycache__", ".pytest_cache", ".git"}
+IGNORED_NAMES = {"settings.json", "__pycache__", ".pytest_cache", ".git", "test-output"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
+PRIVATE_RELATIVE_DIRECTORIES = {("tools", "local")}
 
 
 class UpdateError(RuntimeError):
@@ -211,7 +212,10 @@ def content_hash(skill_dir: Path) -> str:
         directory = stack.pop()
         for entry in sorted(os.scandir(directory), key=lambda item: item.name):
             path = Path(entry.path)
+            relative = path.relative_to(skill_dir)
             if entry.name in IGNORED_NAMES or path.suffix.lower() in IGNORED_SUFFIXES:
+                continue
+            if entry.is_dir(follow_symlinks=False) and relative.parts in PRIVATE_RELATIVE_DIRECTORIES:
                 continue
             if entry.is_symlink() or _is_reparse(path):
                 raise UpdateError(f"linked skill resource is unsupported: {path}")
