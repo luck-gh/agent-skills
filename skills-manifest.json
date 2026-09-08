@@ -1,6 +1,6 @@
 {
-  "content_sha256": "97ba2c8eb96f75285804daab31d007c9d261df95c4be31e56d050acfb609e805",
-  "generated_at": "2026-09-08T15:58:31Z",
+  "content_sha256": "f66dfe5080769745706811e34401c9cbd1981aae2b81e40a1ff253ac403b4797",
+  "generated_at": "2026-09-08T16:16:08Z",
   "repository": "luck-gh/agent-skills",
   "schema_version": 1,
   "skills": {
@@ -93,7 +93,7 @@
       "path": "capture-personal-knowledge"
     },
     "diagram-codebase": {
-      "content_sha256": "567ff2b9440b613344651be8ba5b154666f281bc5fd48b987b8161eb6fd9cb59",
+      "content_sha256": "ab44d06ade009c38e9546354131b9e386ab62c46f48b150def958fca80ec3e81",
       "files": [
         {
           "path": ".gitignore",
@@ -294,10 +294,6 @@
         {
           "path": "tools/bundled/wheels/mdurl-0.1.2-py3-none-any.whl",
           "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"
-        },
-        {
-          "path": "tools/local/scans/4f22851294aa5787f318/index.json",
-          "sha256": "65b902c8f968bc1831c28e455927f416f80f6db0e5b199727eb75ce88556e73b"
         }
       ],
       "path": "diagram-codebase"
@@ -1103,5 +1099,5 @@
       "path": "windows-software-install"
     }
   },
-  "snapshot_id": "20260908T155831Z-97ba2c8eb96f7528"
+  "snapshot_id": "20260908T161608Z-f66dfe5080769745"
 }
