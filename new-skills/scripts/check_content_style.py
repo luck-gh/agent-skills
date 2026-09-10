@@ -136,6 +136,9 @@ def _files_under(skill_dir: Path, folder_name: str, suffixes: set[str]) -> list[
 
 def _collect_files(skill_dir: Path) -> list[Path]:
     files = [skill_dir / "SKILL.md"]
+    readme = skill_dir / "README.md"
+    if os.path.lexists(readme):
+        files.append(readme)
     files.extend(_files_under(skill_dir, "references", {".md"}))
     files.extend(_files_under(skill_dir, "agents", {".yaml", ".yml"}))
     return sorted(files, key=lambda item: item.relative_to(skill_dir).as_posix())

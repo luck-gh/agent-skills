@@ -91,6 +91,25 @@ class SkillValidatorTests(unittest.TestCase):
             }.issubset(codes)
         )
 
+    def test_readme_links_are_checked_but_do_not_declare_runtime_resources(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="skill-readme-") as temporary:
+            skill = write_skill(Path(temporary))
+            readme = skill / "README.md"
+            readme.write_text("# Usage\n[Entry](SKILL.md)\n", encoding="utf-8")
+            self.assertEqual([], self.validator.validate_skill(skill))
+            readme.write_text(
+                "# Usage\n[Missing](missing.md)\n[Outside](../outside.md)\n"
+                "[Extra](references/extra.md)\n", encoding="utf-8"
+            )
+            (skill / "references" / "extra.md").write_text("# Extra\n", encoding="utf-8")
+            issues = self.validator.validate_skill(skill)
+            self.assertTrue({"missing-resource", "resource-escape", "undeclared-resource"}.issubset(
+                {issue["code"] for issue in issues}
+            ))
+            self.assertEqual("README.md", next(
+                issue["path"] for issue in issues if issue["code"] == "missing-resource"
+            ))
+
     def test_all_agent_yaml_is_parsed(self) -> None:
         with tempfile.TemporaryDirectory(prefix="skill-validator-") as temporary:
             skill = write_skill(Path(temporary))
@@ -370,6 +389,17 @@ class NewSkillsToolTests(unittest.TestCase):
             )
             payload = self.style.check_skills([str(skill)])
         self.assertEqual("agents/runtime.yml", payload["violations"][0]["relative_path"])
+
+    def test_content_style_checks_readme_without_changing_examples(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="style-readme-") as temporary:
+            skill = write_skill(Path(temporary))
+            readme = skill / "README.md"
+            original = "# 使用\n正文，说明.\n```text\n用户，示例\n```\n> 原文，引用\n"
+            readme.write_text(original, encoding="utf-8")
+            payload = self.style.check_skills([str(skill)])
+            self.assertEqual(1, len(payload["violations"]))
+            self.assertEqual("README.md", payload["violations"][0]["relative_path"])
+            self.assertEqual(original, readme.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

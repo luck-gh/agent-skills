@@ -2,7 +2,7 @@
 
 这是一组可安装的 Agent Skills.每个 Skill 都把特定任务的操作规则,参考资料和可选脚本打包在一起,让支持 Agent Skills 的应用能够按需发现并执行对应工作流.
 
-各版本的实质修改见 [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+各版本的实质修改见 [`docs/CHANGELOG.md`](docs/CHANGELOG.md).每个 Skill 目录中的 README 提供独立的安装,示例,配置和验证边界说明;SKILL.md 及必要引用保留 Agent 执行规则,使用时不需要额外加载 README.
 
 不知道有哪些 Skill、该怎么用?先阅读 [Skill 功能与使用示例 (`docs/SKILLS.md`)](docs/SKILLS.md),按用途选择适合当前任务的 Skill.安装后,复制对应的使用示例,把其中的占位内容替换为你的实际需求,再发给 Agent.
 

@@ -1,20 +1,22 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "selection_policy": {
-    "mapping_role": "advisory_for_implicit_selection",
+    "mapping_role": "advisory_for_automatic_selection",
     "availability_gate": "current_tool_schema",
     "supported_explicit_unmapped": "allowed",
     "unsupported_explicit": "refused",
-    "unmapped_implicit": "omitted"
+    "unmapped_automatic": "omitted"
   },
   "models": [
     {
-      "model_id": "gpt-5.6-sol",
-      "display_name": "GPT-5.6 Sol",
+      "model_id": "gpt-6-astra",
+      "display_name": "GPT-6 Astra",
       "default_level_id": "L4",
       "task_profile_ids": [
         "strategic-control",
-        "cross-branch-decision"
+        "cross-branch-decision",
+        "high-risk-reasoning",
+        "ambiguous-problem-solving"
       ],
       "default_reasoning_profile_id": "deep",
       "availability": "schema-gated",
@@ -24,8 +26,8 @@
       ]
     },
     {
-      "model_id": "gpt-5.6-terra",
-      "display_name": "GPT-5.6 Terra",
+      "model_id": "gpt-5.6-sol",
+      "display_name": "GPT-5.6 Sol",
       "default_level_id": "L3",
       "task_profile_ids": [
         "branch-coordination",
@@ -37,7 +39,23 @@
       "availability": "schema-gated",
       "source_ids": [
         "runtime-contract",
-        "official-subagent-model-guidance",
+        "local-routing-policy"
+      ]
+    },
+    {
+      "model_id": "gpt-5.6-terra",
+      "display_name": "GPT-5.6 Terra",
+      "default_level_id": "L2",
+      "task_profile_ids": [
+        "read-only-code-exploration",
+        "targeted-code-change",
+        "focused-refactor-test",
+        "granular-ui-iteration"
+      ],
+      "default_reasoning_profile_id": "balanced",
+      "availability": "schema-gated",
+      "source_ids": [
+        "runtime-contract",
         "local-routing-policy"
       ]
     },
@@ -69,11 +87,10 @@
         "repeatable-validation",
         "high-volume-clear-work"
       ],
-      "default_reasoning_profile_id": "balanced",
+      "default_reasoning_profile_id": "light",
       "availability": "schema-gated",
       "source_ids": [
         "runtime-contract",
-        "official-subagent-model-guidance",
         "local-routing-policy"
       ]
     }

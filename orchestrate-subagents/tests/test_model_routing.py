@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -19,7 +20,7 @@ POLICY_FIELDS = {
     "availability_gate",
     "supported_explicit_unmapped",
     "unsupported_explicit",
-    "unmapped_implicit",
+    "unmapped_automatic",
 }
 MODEL_FIELDS = {
     "model_id",
@@ -44,13 +45,46 @@ class ModelRoutingTests(unittest.TestCase):
         raw, catalog = read_catalog()
 
         self.assertEqual(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", raw)
-        self.assertEqual(1, catalog["schema_version"])
+        self.assertEqual(2, catalog["schema_version"])
         self.assertEqual(TOP_LEVEL_FIELDS, set(catalog))
         self.assertEqual(POLICY_FIELDS, set(catalog["selection_policy"]))
         for model in catalog["models"]:
             self.assertEqual(MODEL_FIELDS, set(model))
         for source in catalog["sources"]:
             self.assertEqual(SOURCE_FIELDS, set(source))
+
+    def test_policy_keeps_runtime_gate_and_explicit_choice(self) -> None:
+        _, catalog = read_catalog()
+        self.assertEqual(
+            {
+                "mapping_role": "advisory_for_automatic_selection",
+                "availability_gate": "current_tool_schema",
+                "supported_explicit_unmapped": "allowed",
+                "unsupported_explicit": "refused",
+                "unmapped_automatic": "omitted",
+            },
+            catalog["selection_policy"],
+        )
+
+    def test_profiles_are_declared_and_have_candidates(self) -> None:
+        _, catalog = read_catalog()
+        guidance = (SKILL_ROOT / "references" / "model-selection.md").read_text(encoding="utf-8")
+        declared = set(re.findall(r"^- `([a-z]+(?:-[a-z]+)+)`:", guidance, re.MULTILINE))
+        mapped = {profile for model in catalog["models"] for profile in model["task_profile_ids"]}
+        self.assertTrue(declared)
+        self.assertEqual(declared, mapped)
+
+    def test_focused_changes_do_not_depend_on_one_model(self) -> None:
+        _, catalog = read_catalog()
+        candidates = [
+            model for model in catalog["models"]
+            if model["default_level_id"] == "L2"
+            and "targeted-code-change" in model["task_profile_ids"]
+        ]
+        self.assertGreaterEqual(len(candidates), 2)
+        for unavailable in candidates:
+            remaining = [model for model in candidates if model["model_id"] != unavailable["model_id"]]
+            self.assertTrue(remaining)
 
     def test_mappings_cover_levels_and_reference_declared_sources(self) -> None:
         _, catalog = read_catalog()

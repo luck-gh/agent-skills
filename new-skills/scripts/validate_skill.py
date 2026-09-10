@@ -323,6 +323,8 @@ def _check_resources(
     markdown_files = [skill_dir / "SKILL.md"] + [
         path for path in files["references"] if path.suffix.lower() == ".md"
     ]
+    if os.path.lexists(skill_dir / "README.md"):
+        markdown_files.append(skill_dir / "README.md")
     for source in markdown_files:
         relative_source = source.relative_to(skill_dir).as_posix()
         try:

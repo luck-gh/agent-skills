@@ -1,45 +1,57 @@
 {
-  "content_sha256": "f66dfe5080769745706811e34401c9cbd1981aae2b81e40a1ff253ac403b4797",
-  "generated_at": "2026-09-08T16:16:08Z",
+  "content_sha256": "20728ccf7c382fb437aa2cbfcc208c657e789fb3b94080ac58aeaf43eb446146",
+  "generated_at": "2026-09-10T09:49:01Z",
   "repository": "luck-gh/agent-skills",
   "schema_version": 1,
   "skills": {
     "bootstrap-project-context": {
-      "content_sha256": "182e401d573973e75117d63bc22543f7a6349050d2d986ff241085a5f8a6acb9",
+      "content_sha256": "95e2b9e49ed94879112d3dbde275ad913953a1dc83008356d484cbdbaf3f2f02",
       "files": [
         {
+          "path": "README.md",
+          "sha256": "c14f219c982c6358826bc37ef142a5665295be5ddcf15e98a29e95d442e08a4d"
+        },
+        {
           "path": "SKILL.md",
-          "sha256": "f9134cc12ed6470e572020408ec2d540e7e60ea3483a27d98d4fb652272ff121"
+          "sha256": "d14e3b4a0dea273a0d81d3a111cada7d8cc933bc5446ade9996b6d107686f658"
         },
         {
           "path": "agents/openai.yaml",
-          "sha256": "865d996b2dd2bac7747fcf24acb13fc352f1c4dab16496cd7c237151870b737d"
+          "sha256": "1d205305303a36605e800f807eac2ff5f5ec08cfee3941bf9c557a5a8e4a6558"
         },
         {
           "path": "references/blank-project.md",
-          "sha256": "3c33102830c801e0b439105294a6b021355e0f64b8669d3a9bbce1c070cbd085"
+          "sha256": "6e38eec862a36c3d191f19a2dea6eb13c7f7851c3d6e41567caa7fe534e9f4f8"
+        },
+        {
+          "path": "references/engineering-workflow.md",
+          "sha256": "85dbcc39c3297a51e7754bff0b4460db7ac2f6148fcf1595c6fb3740f72cc3aa"
         },
         {
           "path": "references/existing-project.md",
-          "sha256": "7d65bd9dc0e08797abea2c95a022bd8d625a8369ea32ffcf70d67ac60fb5bef2"
+          "sha256": "af9e98ae6b681e30af27bb9dd018ecbf6a7791babd674a09554f7bbe620d4674"
         },
         {
           "path": "references/explicit-calibration.md",
-          "sha256": "d16ac21b77f05a54256702cb7205b3d754f3937573b49e1595b5fd7c260df74c"
+          "sha256": "933b7e3bb7c5f09518d31576c83064021c78859bafd473d9b61cec39d606a7be"
         },
         {
           "path": "references/project-document-contract.md",
-          "sha256": "99221d8278c9818adadc7b286712924a666378ef00b99c12546ceb7f9de669f8"
+          "sha256": "7ee4a38610c24fdceea6e4d06679d71d2d9b47d50a82d09594190b3fb9f631c2"
         }
       ],
       "path": "bootstrap-project-context"
     },
     "capture-personal-knowledge": {
-      "content_sha256": "6740fd7b45653f17fd6bd7b1b945a39e9f17e185f0cccbe71cad26304c44c571",
+      "content_sha256": "c190367394e046ca23b25af0f48930182fc8f5964fe594d48606aa5bcb6c5c7e",
       "files": [
         {
           "path": ".gitignore",
           "sha256": "93f6c4263173754f9f1abf54d2604308fba0a8aceb7b03de4fbc9fb5c4459972"
+        },
+        {
+          "path": "README.md",
+          "sha256": "a080750b03c2ea424541a8ef8e5ad50bb8c07102989603bcd0360d75b4700f79"
         },
         {
           "path": "SKILL.md",
@@ -93,11 +105,15 @@
       "path": "capture-personal-knowledge"
     },
     "diagram-codebase": {
-      "content_sha256": "ab44d06ade009c38e9546354131b9e386ab62c46f48b150def958fca80ec3e81",
+      "content_sha256": "cf23163224c8421c697e7123298d5ba5d6c99cfa1ff8ada06d945aca7b4f5262",
       "files": [
         {
           "path": ".gitignore",
           "sha256": "1638b9aaad518f68fcde2748d0b6ebf92a25443ff9adb203023d662a92bc4897"
+        },
+        {
+          "path": "README.md",
+          "sha256": "40215185599af839eabc4724a668832157a467f97f6db44a8abe78dcc16cba15"
         },
         {
           "path": "SKILL.md",
@@ -299,19 +315,27 @@
       "path": "diagram-codebase"
     },
     "distill-person-thinking": {
-      "content_sha256": "a161bea2dcfe285b54dc119645f3d7273250f24dabe2023319d936efc007ac4c",
+      "content_sha256": "7af99ed6854a4b70882cf619e290fdd485b8b1fd156c1dd30e67434547cfff18",
       "files": [
         {
           "path": ".gitignore",
           "sha256": "93f6c4263173754f9f1abf54d2604308fba0a8aceb7b03de4fbc9fb5c4459972"
         },
         {
+          "path": "LICENSE",
+          "sha256": "41a666fc4a4ead5431be8a18889e1162477de56779b9000e58658ca79df3bf3e"
+        },
+        {
           "path": "NOTICE.txt",
-          "sha256": "1d6f84d65e57f2880c6d45db2832db3cafc202dc3cba3cd78f40feae2031ff1a"
+          "sha256": "47d76c1438e87cbcb3a732cf78ddf76b1a6b12b25ede1d3f467db965e693fbeb"
+        },
+        {
+          "path": "README.md",
+          "sha256": "754ebb81dd5ce7d2ceccc946a633bd10b9e2de1d7da03c35b104ec30668a81bb"
         },
         {
           "path": "SKILL.md",
-          "sha256": "b2407faa2b934fef7fd3d9879e05c03127707e080e1970e204f126d132682648"
+          "sha256": "f8440c50f812ef1b1e47c66deed39cecff336cca0f33bd5691da83f07bd44be8"
         },
         {
           "path": "agents/openai.yaml",
@@ -359,7 +383,7 @@
         },
         {
           "path": "models/sources/思维模型_卡帕西_S02.md",
-          "sha256": "16d968a3ff3d6d8cb164357538406774c6ac3bf09de7291e96656abcd258d822"
+          "sha256": "1c14b707918c0bb48e4a26d2e24b9461ea56a15e6899013caae544cbfd419ae9"
         },
         {
           "path": "models/sources/思维模型_吉姆_凯勒_S01.md",
@@ -451,7 +475,7 @@
         },
         {
           "path": "models/sources/思维模型_安迪_格鲁夫_S02.md",
-          "sha256": "dc00a32016097d3d387aff4f6e5ac15be443f261e21cd50fe207a09d7ce14b02"
+          "sha256": "e626846f86ab66ad21eadbdbf7a6df4fce57eb67a6c700cb415e7f7cd5e3f070"
         },
         {
           "path": "models/sources/思维模型_巴菲特_S01.md",
@@ -695,19 +719,19 @@
         },
         {
           "path": "models/思维模型_乔布斯.md",
-          "sha256": "28945fb35b92422a482943e667244a10c5c1ed8581371430fd8c5349ebad3761"
+          "sha256": "55f264991c9ecd84c17bbf2aa865efbe0885e5e3a1114fd4e526f06903e55831"
         },
         {
           "path": "models/思维模型_伊利亚_苏茨克维.md",
-          "sha256": "4ede88647c792b44e086d5c67d676e4b8a83873b94f409e4870828d75b219139"
+          "sha256": "81636a61bd095e4af5f666a7cea3768d158d8e127a385e128bac6c676eee7fe1"
         },
         {
           "path": "models/思维模型_保罗_格雷厄姆.md",
-          "sha256": "cd1e2b33c2ad7c2ff5f59568a31ef8cf6b4dcb29d01de8ca775c3a7a8b46b0f7"
+          "sha256": "6164c5a6df1dabc0904c0a0c43f6bb3122cd0a4a0b59937af0558d5efd4866bd"
         },
         {
           "path": "models/思维模型_卡帕西.md",
-          "sha256": "5d7c08fb6ccbc2b3fe92fbcef817c621142290f8e7fc66a5509259edad620836"
+          "sha256": "7fab3faf64a910514cab4213d5c3d4b71b7bc0125884e64e819f781e4603da6b"
         },
         {
           "path": "models/思维模型_吉姆_凯勒.md",
@@ -715,35 +739,35 @@
         },
         {
           "path": "models/思维模型_吉姆_西蒙斯.md",
-          "sha256": "8e4579a45d93035d422a75afddc3511a3f5e3ae89d6a4adeded01e76789d8f27"
+          "sha256": "9a31af2e39453ab8d8a2d9cfb5423339601e90b1f96db71a416e8507367f2b7a"
         },
         {
           "path": "models/思维模型_吴恩达.md",
-          "sha256": "264ebed0164bcdb1c8bd6304c95d6084080d267f1b0caa0be5496f22e2846d7d"
+          "sha256": "23d3781a40851c4ec2e4e3e903a9d632bbde28cc7383d82338565ee420b1543b"
         },
         {
           "path": "models/思维模型_哈萨比斯.md",
-          "sha256": "75bef00d067fee8c5e1f927ed711ca4a66c70d5408b673f5f325f6c660cbca7f"
+          "sha256": "2a89acbc5a3125504990f4fa269c1e660b1f62892777200dbede21a796199c79"
         },
         {
           "path": "models/思维模型_塔勒布.md",
-          "sha256": "191c45b6e5afc1b05de9cfd1373e9274c2987ba4e63091dab97df5f2bf6f0b50"
+          "sha256": "7e80e92a63da45155f1b1346463d11dbea433aa0ab3dbd0b895cc0d909377425"
         },
         {
           "path": "models/思维模型_孙宇晨.md",
-          "sha256": "3beca02d99ace9e5a86507925640084444f4ffcc3fec1670dd66a42f57e053fd"
+          "sha256": "e42882d34fa37d14c49a9ad2a8f4d01a5df388d8625ce54cf5d240f69b63ca6a"
         },
         {
           "path": "models/思维模型_安迪_格鲁夫.md",
-          "sha256": "1a59fbcc0c3eabda45f0610046b2837742ac2be09eca6e065d0320a25a6e4009"
+          "sha256": "48326978695e95bfddaaf18386065b5d61dd3ab1e0ff2c2f447e556f7e30213f"
         },
         {
           "path": "models/思维模型_巴菲特.md",
-          "sha256": "997948d692f31d7e1ec11b6eea2178cb104edb2610218e79a6c5bf185b4b252e"
+          "sha256": "973448a3453113ad958c00c56d9d220e9551d78cf76701d5ff456a8424f47599"
         },
         {
           "path": "models/思维模型_张一鸣.md",
-          "sha256": "f12b03a97b00acdf3b1d9a30387a1b0cc0bbd690cc851fc606ea0b4ddcc52af4"
+          "sha256": "21fdf593da6cc180539b7afe8d4f568633e39fb85a14498ffcb76c80d33d4c69"
         },
         {
           "path": "models/思维模型_张忠谋.md",
@@ -751,55 +775,55 @@
         },
         {
           "path": "models/思维模型_张雪峰.md",
-          "sha256": "c430315bfbe64c086ef19a7af217307bc99e0e832cab0f7b09033db9accbcaf2"
+          "sha256": "b01635ef041429cddca9348004f1bc475f4c8f8da880457bf6a81d28bc570017"
         },
         {
           "path": "models/思维模型_彼得_林奇.md",
-          "sha256": "4a51741c418ffc7dc9c3d511775d4d08f5f9646b80a4b76ca8a21b7e5ab98629"
+          "sha256": "48b7059cfb5612e2420b6d7f1e8c71782ebaa9bff3366bbf806021dcfc504c54"
         },
         {
           "path": "models/思维模型_朱迪亚_珀尔.md",
-          "sha256": "788cb69ab9aa35bee1a729d15c92f256990befa5c729eafaaecee3c1b599814c"
+          "sha256": "ed4819147125b0f420f8ffdd31e50cd677b90f4412ec6df8607d55f6e304a0e7"
         },
         {
           "path": "models/思维模型_李录.md",
-          "sha256": "b2cb1dc940ca4524d5ccb468e7708e6137dcb557c2deda454b95536ce06cc505"
+          "sha256": "5917ad30298e5d331eaf6a1f5ff69c2bfd5702df34ef93ddd8900f247a7ad267"
         },
         {
           "path": "models/思维模型_李飞飞.md",
-          "sha256": "8df0b1d34cfd90860f1e6028f2c396dec02371623f918bdfedfc6c4fd91ad5c9"
+          "sha256": "c32546aa553b24e7bb888a69236c0552b3b1fc3431a7a4cc12a3ec18591ccb2e"
         },
         {
           "path": "models/思维模型_杨立昆.md",
-          "sha256": "6c589db2fbe5bf2adcff2617478da1d7a5fe668af6dad82eee8bec83cf31df55"
+          "sha256": "ef57dc4e4df97c039041fa0d51899b80a225fc3a4ca27367530b0443226c4345"
         },
         {
           "path": "models/思维模型_段永平.md",
-          "sha256": "64680ec7b23a47bab90fbd5abca0a92931d4e25cc3f5c994cb727a03c03f8aa3"
+          "sha256": "38c3f94129b0edf64ebb9d786fda099ee74c4ab5e90dacbc0d5fd9d4f88ccfb4"
         },
         {
           "path": "models/思维模型_特朗普.md",
-          "sha256": "b97b6c7e1286dc29ba9b2459a0fa1c517beaa467bf8c038caa8dd62585660392"
+          "sha256": "395783a91533bf0da6367ebfc482752041a5cfc5034764119a8294a28554851c"
         },
         {
           "path": "models/思维模型_理查德_萨顿.md",
-          "sha256": "332553bef0a7595bf41953d3b117f84f73c7aded2df40c32b5d864531e44bf1f"
+          "sha256": "570395f8d1405817e37434fc766bcbf15e9c6d693698a6ef4972b7166fdb9a1e"
         },
         {
           "path": "models/思维模型_瑞_达利欧.md",
-          "sha256": "410a547f9d6e0b8a257f94d99417370768fb779b2f4f91eec40ce23b2b2dd209"
+          "sha256": "7884386f60b262591472aa9fa774155f29796cb3fa35c576a4bd1f81dfe85809"
         },
         {
           "path": "models/思维模型_索罗斯.md",
-          "sha256": "cbfefce9fb95c1c13bda953d204012735ee8cfeba8a47e603fa004e381557113"
+          "sha256": "05e94114c66ea431d80262bee8e375f68f49f49a22be763983678359c97437f5"
         },
         {
           "path": "models/思维模型_纳瓦尔.md",
-          "sha256": "ee69be5624ae6f4fa55f2e484df8005310ce26d3c99087b40ae206d48ec1126f"
+          "sha256": "ccf5f1c1e8eba3dfca4493c3b647004dd5c8251f0551806c9599e33a8d780284"
         },
         {
           "path": "models/思维模型_芒格.md",
-          "sha256": "40d367f578e831bad7a9f2ca18f909b1cba093aeefc323dc6729f77eabc1535c"
+          "sha256": "3d8c5098f33e3dcb0335196e6846947fbd01419aff9c13ff93c852c42f798e58"
         },
         {
           "path": "models/思维模型_苏姿丰.md",
@@ -807,39 +831,39 @@
         },
         {
           "path": "models/思维模型_费曼.md",
-          "sha256": "ea34d48c318573e557a6db5c06829dd4f339d1bc2c804208386fa3056efc8c57"
+          "sha256": "bf0ad5c27696d936c8dec7949551f51de161c01971bd7eb85a8e2e7c057a68d8"
         },
         {
           "path": "models/思维模型_辛顿.md",
-          "sha256": "3e7e6f0dc93fa85a878abe94479ef6c04397149362e631cb60d54b8a7ca4b6d8"
+          "sha256": "6b118549862739f74a11b77dc0ab2769c82783c1018bba30acc6de4fbf8cdbaa"
         },
         {
           "path": "models/思维模型_野兽先生.md",
-          "sha256": "373dadfdef06a53eecad9602733b39e895e9c3b0056e95ec865eca27b9bd0c67"
+          "sha256": "2fa7f7d839427bcbc51becb8502eb71c30c983d693c460c261015b4b849345ce"
         },
         {
           "path": "models/思维模型_霍华德_马克斯.md",
-          "sha256": "295c637e0f1375ff61a5d74ac356ec7e81c3d41d17ae243c1a83b1b63342604f"
+          "sha256": "3f727d6c3406f9094ca6099b258508c7c3a2f7d7077de3ecccbee82c73eeb438"
         },
         {
           "path": "models/思维模型_马斯克.md",
-          "sha256": "3f5103c07451230274be95dcd71c17c8178506dd58785ac94762dc98e4341c01"
+          "sha256": "a2dda63fa0a0f2eab58341efe4d43954dd8e35a19a04c2fe7d218a4368a27d2d"
         },
         {
           "path": "models/思维模型_黄仁勋.md",
-          "sha256": "00988063981fa996c18bf099844d5a82473ff4732d171569769ab4a6db223eb5"
+          "sha256": "0cd6e98880c7feb34b8d1f2e4d99d54b931098f49c918f1d9b563590667327d5"
         },
         {
           "path": "references/apply-mode.md",
-          "sha256": "fd725135b756237d6b3ba96b85297de5e9534f2acd122a3808969e5ecd30784b"
+          "sha256": "b341fb860fee9f1a17a5d5b900aa0df6387e2c6ea37a4897da5f803cf300d526"
         },
         {
           "path": "references/brainstorm-mode.md",
-          "sha256": "154ed903fe9bc38ffff4301cc4f686cd37d6878c8ee27851948cedc1eff9038f"
+          "sha256": "3764a67d2e1606f53e9e2f84df730e7a88313c8a693bba14317cacd9f6e83f6c"
         },
         {
           "path": "references/distill-mode.md",
-          "sha256": "3c39129d3e84d56692250169bfc8cae71db4cbc0ae5299b6562a8da8a96809e9"
+          "sha256": "022d7f3073df168ddf2d7618fb053c3044ddc598a638cf710fd5ca5aa72f2456"
         },
         {
           "path": "references/local-settings.md",
@@ -847,27 +871,31 @@
         },
         {
           "path": "references/model-index.md",
-          "sha256": "a142322a78eb7fd7be36e0adbf7171642bb387d372108614a398e722fdf8c627"
+          "sha256": "6a7399b5eeda929f85246ff9f5e23522052c0a07b306b75a513042cd54963cf6"
         },
         {
           "path": "references/model-tags.md",
           "sha256": "f33c61c635ed655751b897ac9d4221b98e5c2237545b126238bdc272989d1c36"
         },
         {
+          "path": "references/model-validation.md",
+          "sha256": "ece3906b85b9a5012789ecf8e24ee19b13a902f9f8318b69e85c6e3401775b3d"
+        },
+        {
           "path": "references/profile-contract.md",
-          "sha256": "e3b92573b95feec32ad988944a59d7afd3aba001442ea35daf991433b7254d5c"
+          "sha256": "80f9827cabb5be34b4db00dcdfd1f7bfcacf201e25eee559379d702bd4dad44d"
         },
         {
           "path": "references/recommend-mode.md",
-          "sha256": "1d6d96ec556698a5ac1bfbb9a6222deea8eab4eb7af583a4778d88a22f6b1785"
+          "sha256": "cce23215a9931aa3fde2b78138125ca6e2630b50a7252661dda1c64659a2cb3c"
         },
         {
           "path": "references/source-distillation.md",
-          "sha256": "2a4b74875be685da427de0d814056132746267b33fc4bfae1710e120c6ded42c"
+          "sha256": "b0a51d47aa321c8d8f8fd442be9e4b54e7e2ad9f97c3270354ff670d24e20b5c"
         },
         {
           "path": "references/source-policy.md",
-          "sha256": "b0b0a026f22a334943107f41d962f4580dbb2d5783c7c59f02f9d7f75d143347"
+          "sha256": "974afd6b8d712426342e26d4d260cb6f48938eb10376deba6d1835b52dddb3f2"
         },
         {
           "path": "settings.example.json",
@@ -877,8 +905,12 @@
       "path": "distill-person-thinking"
     },
     "markdown-note-format": {
-      "content_sha256": "2874c4e868fd734a65e2df74e63d02f0a41ce8b626d2540bf8295a6bf16095ce",
+      "content_sha256": "ba404ae5da8f9ab457349c0115944e5615fe50effe431a226d7fa83830e18292",
       "files": [
+        {
+          "path": "README.md",
+          "sha256": "2f5f3d05f616bda7445938670e17b2ef31c596b222504e0f3e2cabcddb1882f5"
+        },
         {
           "path": "SKILL.md",
           "sha256": "ec58c9b633b75ffa0c2d8ccb9c77c3baca3da9d9b90c43cad778e4a377d15a9e"
@@ -903,15 +935,23 @@
       "path": "markdown-note-format"
     },
     "new-skills": {
-      "content_sha256": "5d06e443b5bfae1632b2ca1b2823afa5031d9f601669f4845a5938dcad50180a",
+      "content_sha256": "c52bf282a83cb8e927fdaed1f2b1aa84216dc214a8d8bf8e98ddfde1da1fa32c",
       "files": [
         {
           "path": ".gitignore",
           "sha256": "93f6c4263173754f9f1abf54d2604308fba0a8aceb7b03de4fbc9fb5c4459972"
         },
         {
+          "path": "LICENSE",
+          "sha256": "41a666fc4a4ead5431be8a18889e1162477de56779b9000e58658ca79df3bf3e"
+        },
+        {
+          "path": "README.md",
+          "sha256": "046396ce66e071668532e3bdf8b50e4b5c17d4a13746b62d8c3a33c0f08cab96"
+        },
+        {
           "path": "SKILL.md",
-          "sha256": "7ab1814eb8e18313c39d2a09c233c10a8c04a95860def757c1a8d23d79c65d65"
+          "sha256": "7f2ee9f140af165f41a25c066cc6c8609008ec3a6dc770c4cb29a25a87969a93"
         },
         {
           "path": "agents/openai.yaml",
@@ -927,15 +967,15 @@
         },
         {
           "path": "references/repository-updates.md",
-          "sha256": "73a6d01d31a221751ad7c93f83423962c544a17f11cd5fe959d879af567262c9"
+          "sha256": "6a07a957260b4cd9508446842e244793d759f0bbc74a69712381f1598a8079d9"
         },
         {
           "path": "references/validation-contract.md",
-          "sha256": "36b1138e97144d93f086c991fb044de8191941b433b3f6a93e021708d3803d4e"
+          "sha256": "c370f4d362b3aba9b07d76600dee913e2cfaf41fb958bc5e90cbd22eddddd9f7"
         },
         {
           "path": "scripts/check_content_style.py",
-          "sha256": "4819e7507c4da69d61df6c89b4c9ce9abcc3644e96383a2b1f0cb9a885258c00"
+          "sha256": "c2584d67302ff6a65d3067f5c640ab1abc7acb6b5e41a93f8ff3cbbc0487b4c2"
         },
         {
           "path": "scripts/ensure_skill_entry.py",
@@ -947,7 +987,7 @@
         },
         {
           "path": "scripts/validate_skill.py",
-          "sha256": "e2db038364c7e88355aed3b91041302cf0bc616912b0fb75afc6bb3bc814ce89"
+          "sha256": "57843250381e65461950f5680669332f3f120a622cca9e99413293be64fa5a16"
         },
         {
           "path": "settings.example.json",
@@ -959,33 +999,37 @@
         },
         {
           "path": "tests/test_skill_tools.py",
-          "sha256": "e381cdbff268b86952ce4ff5f5e959d4598c3f6944416f8e985f05a0484a5da0"
+          "sha256": "ec02ad3339f14a3faf8708554c3a8b92175238ea6f82e0461d98e7090d823577"
         }
       ],
       "path": "new-skills"
     },
     "orchestrate-subagents": {
-      "content_sha256": "1bf508c1c3de2cf79bfba2fe16b9ff3a63d24c4cc7d88f3c096a7cc4e8df66bb",
+      "content_sha256": "69b94bcced4918bcf6dcea8e6b2816012328488ce4a3f991ab6892ffa9be06ed",
       "files": [
         {
+          "path": "README.md",
+          "sha256": "db362635a800de0e97e029fb891bc505edc790b026b4f928bf48e4b1ca6167ba"
+        },
+        {
           "path": "SKILL.md",
-          "sha256": "270fb8d8cbfbaa2bdaefcd54f81e1d3fd0bfff81c580f76f6685a3fc7d022649"
+          "sha256": "2b1210a85f6f37f4558e5d2c1d4af3ea1d50fbf5c7edb466a6f20e8f57f08ea3"
         },
         {
           "path": "agents/openai.yaml",
-          "sha256": "ea74fe5d37694a0430c4f3ded3b99942fc116bd3f76d2c42f1ca6c5a7bb165c1"
+          "sha256": "54d5905b769c6537bd2516a1f5f115d0ee6e7f532326d9d6366056dc4086e218"
         },
         {
           "path": "references/mixed-carriers.md",
-          "sha256": "0e3d5d04e0460ca6032213054109046829fdd8ac7736978de1352688639aba6f"
+          "sha256": "62e9d91391b8d5c82fc0670eb3e6d752d021b3b155f377962b85550ec247f657"
         },
         {
           "path": "references/model-routing.json",
-          "sha256": "e3262f8b33a61d40724565962dc0e7e979a84fc4b8dfd4b6306f194b2c099894"
+          "sha256": "8f5b321e2d4f3649a733cdab5ba16a34d431abcb0355dd71ca3a1e350ee3f361"
         },
         {
           "path": "references/model-selection.md",
-          "sha256": "4f793914974ee29572136ae424b88a8227f0552b93c70b847fb7e2f4501e710e"
+          "sha256": "0340870e36d3486de2f44e0a8e353a9a52626b92dbe88f1068339402ffab9748"
         },
         {
           "path": "references/new-task-callbacks.md",
@@ -993,30 +1037,34 @@
         },
         {
           "path": "references/new-tasks.md",
-          "sha256": "eb6e45f8c93b27d1e69ab21782678b9de4b854494a47b847c1cb85e556798f16"
+          "sha256": "055e3fdfafe75511a9ca287c60cb26e5c21695b05f1317b9f01b433e00e3eaae"
         },
         {
           "path": "references/routing.md",
-          "sha256": "8020eed0bebef0524ac6f71c1c6e5ad7ec3e8ef256481a12cb62fc13802217e8"
+          "sha256": "484a0351798395854715811bf59df382f4fe93370b6c8143b7e7b7ac6922bd3a"
         },
         {
           "path": "references/subagents.md",
-          "sha256": "37d89f5afeefe48b35fc785d7883068f54ff899820f4123b961e6148e7e020b1"
+          "sha256": "b2e7ed5590569821ed9fdebf3df9778681c9a458aea17e559ceec963e5939078"
         },
         {
           "path": "references/task-contract.md",
-          "sha256": "4038675a45b9fc792ab826052e3bea8b6266957fa7d37fe16cb46e45801ea9c3"
+          "sha256": "a1e4fbd1045099f1ce1e647ab28799ac6aaa3d2b0d1cca093c81039cf89e09b2"
         },
         {
           "path": "tests/test_model_routing.py",
-          "sha256": "2fe2d2e3a3dfee0763983fa1fed762749b6c8cfadc94f600932b551980e6c890"
+          "sha256": "c069b47cebc5cbc8f679160e12eb15614163980973d9378cba75f1e4a5735594"
         }
       ],
       "path": "orchestrate-subagents"
     },
     "windows-codex-shell": {
-      "content_sha256": "af3ec0b618742434675a2fd77bdfed1081a7af75a41d51a49b9f21078c24adca",
+      "content_sha256": "18faa0506ff2b7b1951ecb2ee776a1e11e8c6a1f86ae5d7f7a7d5073f8082d80",
       "files": [
+        {
+          "path": "README.md",
+          "sha256": "90af0d2432996dc8727f67bb29bb2f092277f61db84965ee380fb76c882d99b7"
+        },
         {
           "path": "SKILL.md",
           "sha256": "d3c49af90cd1a5f2c5d104e0028a8bc6192d9768c28b55d38f55cdc79801ec01"
@@ -1049,11 +1097,15 @@
       "path": "windows-codex-shell"
     },
     "windows-software-install": {
-      "content_sha256": "760a882d43fc05b67de32ae032dda3fa5f8e89c57042c96cbad5d13c9eb3c353",
+      "content_sha256": "2f00ae166ba2d2ecb266dfe500ad6eff39ec24db0cc46b08581cf0c90726e31f",
       "files": [
         {
           "path": ".gitignore",
           "sha256": "93f6c4263173754f9f1abf54d2604308fba0a8aceb7b03de4fbc9fb5c4459972"
+        },
+        {
+          "path": "README.md",
+          "sha256": "819f3a2e522e132962c68f670c8c3ddf344dc41cac511f314faca8e9ec5ba1bd"
         },
         {
           "path": "SKILL.md",
@@ -1099,5 +1151,5 @@
       "path": "windows-software-install"
     }
   },
-  "snapshot_id": "20260908T161608Z-f66dfe5080769745"
+  "snapshot_id": "20260910T094901Z-20728ccf7c382fb4"
 }

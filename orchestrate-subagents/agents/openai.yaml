@@ -1,7 +1,7 @@
 interface:
   display_name: "纯总控多承载编排"
-  short_description: "仅显式调用的纯总控,协调内部子代理与独立任务,负责等待,决策和验收"
-  default_prompt: "使用 $orchestrate-subagents 按用户指定或最小影响的承载方式进行纯总控编排,只负责路由,等待,决策和验收."
+  short_description: "显式调用的纯总控,按需拆分并为内部子代理选模型与领域 Skill,协调和验收"
+  default_prompt: "使用 $orchestrate-subagents 由当前任务担任纯总控,按需拆分并为内部子代理选择合适的模型,推理强度和领域 Skill,统一协调和验收."
 
 policy:
   allow_implicit_invocation: false

@@ -1,9 +1,5 @@
-Nuwa model discovery and adaptation attribution
-Source: https://github.com/alchaincyf/nuwa-skill
-Version: fe0374687037c4cc51a65c1e0c145afe2981dc69
-The selected model topics were traced to primary sources and independently
-rewritten for this skill. Upstream roleplay instructions, code and raw corpora
-are not included. The upstream notice is retained below.
+Third-party copyright notice retained for distribution.
+This notice does not require downloading or consulting external resources.
 
 MIT License
 
