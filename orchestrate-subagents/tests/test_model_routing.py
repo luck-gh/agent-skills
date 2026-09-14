@@ -33,11 +33,27 @@ MODEL_FIELDS = {
 }
 SOURCE_FIELDS = {"source_id", "kind", "location"}
 REASONING_PROFILES = {"light", "balanced", "deep", "exceptional"}
+MODEL_ID_PATTERN = re.compile(
+    r"(?<![a-z0-9])gpt-\d+(?:\.\d+)*(?:-[a-z][a-z0-9]*)*(?![a-z0-9-])",
+    re.IGNORECASE,
+)
 
 
 def read_catalog() -> tuple[str, dict[str, object]]:
     raw = CATALOG_PATH.read_text(encoding="utf-8")
     return raw, json.loads(raw)
+
+
+def find_model_ids(text: str) -> set[str]:
+    """找出正文中符合当前模型 ID 形态的名称."""
+
+    return {match.group(0).lower() for match in MODEL_ID_PATTERN.finditer(text)}
+
+
+def find_unregistered_model_ids(text: str, registered_ids: set[str]) -> set[str]:
+    """找出正文中符合模型 ID 形态但未在目录登记的名称."""
+
+    return find_model_ids(text) - {model_id.lower() for model_id in registered_ids}
 
 
 class ModelRoutingTests(unittest.TestCase):
@@ -116,8 +132,24 @@ class ModelRoutingTests(unittest.TestCase):
         )
 
         for model in catalog["models"]:
-            self.assertNotIn(model["model_id"], other_text)
             self.assertNotIn(model["display_name"], other_text)
+
+        registered_ids = {model["model_id"] for model in catalog["models"]}
+        self.assertEqual(set(), find_model_ids(other_text))
+        self.assertEqual(set(), find_unregistered_model_ids(other_text, registered_ids))
+
+    def test_unregistered_model_id_shape_is_detected(self) -> None:
+        _, catalog = read_catalog()
+        registered_ids = {model["model_id"] for model in catalog["models"]}
+        known_id = next(iter(registered_ids))
+        unknown_id = "-".join(("gpt", "999.9", "unlisted"))
+
+        self.assertEqual({known_id, unknown_id}, find_model_ids(f"{known_id} {unknown_id}"))
+        self.assertEqual(
+            {unknown_id},
+            find_unregistered_model_ids(f"{known_id} {unknown_id}", registered_ids),
+        )
+        self.assertEqual(set(), find_unregistered_model_ids("generic model guidance", registered_ids))
 
 
 if __name__ == "__main__":

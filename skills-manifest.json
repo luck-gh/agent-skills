@@ -1,6 +1,6 @@
 {
-  "content_sha256": "3f2a0891f5e3e0218038bae5fc2824d6c5de10f2f5296fca53336907d626c34d",
-  "generated_at": "2026-09-11T02:26:16Z",
+  "content_sha256": "ef5bccaa7866c5ee4d9503df9d4469dd2040b3ec3dc1576255c378563632080d",
+  "generated_at": "2026-09-14T09:45:27Z",
   "repository": "luck-gh/agent-skills",
   "schema_version": 1,
   "skills": {
@@ -1005,15 +1005,15 @@
       "path": "new-skills"
     },
     "orchestrate-subagents": {
-      "content_sha256": "69b94bcced4918bcf6dcea8e6b2816012328488ce4a3f991ab6892ffa9be06ed",
+      "content_sha256": "8dfeb803894cfc78b3383e76adbe163db4bbc576802bf53f80d8937544c8e1f8",
       "files": [
         {
           "path": "README.md",
-          "sha256": "db362635a800de0e97e029fb891bc505edc790b026b4f928bf48e4b1ca6167ba"
+          "sha256": "9925c7e9444fab1fc46c9867e33f08815d44f91c5358a6449890a58d7160723f"
         },
         {
           "path": "SKILL.md",
-          "sha256": "2b1210a85f6f37f4558e5d2c1d4af3ea1d50fbf5c7edb466a6f20e8f57f08ea3"
+          "sha256": "ba9c2b305803664e5857b613fee3084f6014c38fe252b152ba9caee6175b4ea2"
         },
         {
           "path": "agents/openai.yaml",
@@ -1029,7 +1029,7 @@
         },
         {
           "path": "references/model-selection.md",
-          "sha256": "0340870e36d3486de2f44e0a8e353a9a52626b92dbe88f1068339402ffab9748"
+          "sha256": "64cf031a73b978eedf87ba231f464e245e25a64bd7838fe770d44d124d15d1a1"
         },
         {
           "path": "references/new-task-callbacks.md",
@@ -1041,19 +1041,19 @@
         },
         {
           "path": "references/routing.md",
-          "sha256": "484a0351798395854715811bf59df382f4fe93370b6c8143b7e7b7ac6922bd3a"
+          "sha256": "8ecb714622dd2666c56c3c0ad9fce921ecff6b8d0044640db7d6904a1656ce20"
         },
         {
           "path": "references/subagents.md",
-          "sha256": "b2e7ed5590569821ed9fdebf3df9778681c9a458aea17e559ceec963e5939078"
+          "sha256": "adeb46b5ee4ab1dc61855c0f9f7cf6135b6d23bc673118149b68d4582e222f06"
         },
         {
           "path": "references/task-contract.md",
-          "sha256": "a1e4fbd1045099f1ce1e647ab28799ac6aaa3d2b0d1cca093c81039cf89e09b2"
+          "sha256": "ffa0305e875e15f8a9de01e17b0ed587263addc15dbbf93bbb30db00324593e8"
         },
         {
           "path": "tests/test_model_routing.py",
-          "sha256": "c069b47cebc5cbc8f679160e12eb15614163980973d9378cba75f1e4a5735594"
+          "sha256": "faa1f5f5d7f666cd6cfb8df00e3427c4fe22349008e1ea9b960bde74657cd4e4"
         }
       ],
       "path": "orchestrate-subagents"
@@ -1151,5 +1151,5 @@
       "path": "windows-software-install"
     }
   },
-  "snapshot_id": "20260911T022616Z-3f2a0891f5e3e021"
+  "snapshot_id": "20260914T094527Z-ef5bccaa7866c5ee"
 }
