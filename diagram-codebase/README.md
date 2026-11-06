@@ -43,11 +43,13 @@ Python 脚本基线为 CPython 3.12 / Windows x64.Python 源码使用标准库 a
 
 ## 工作流程与成果
 
-inventory 清点后必须 scan,再 query/context 定向读取证据,生成两份候选并核验.默认输出到目标项目的 `docs/architecture/overview.drawio` 和 `overview.md`,自定义位置优先;更新已有成果沿用其路径.必要的配置按需保存为同目录 `analysis-config.json`,过程文件限 `_work/<主文件名>/`,内部索引保留在工具环境.详见[离线流程](references/offline-analysis.md)和[分析配置](references/analysis-configuration.md).
+inventory 清点后必须 scan,再 query/context 定向读取证据,生成速览与详解并核验.首次生成直接写最终文件,不创建重复候选;更新已有成果时才使用候选与必要备份.默认输出到目标项目的 `docs/architecture/overview.drawio` 和 `overview.md`,自定义位置优先;更新已有成果沿用其路径.必要的配置按需保存为同目录 `analysis-config.json`,过程文件限 `_work/<主文件名>/`,内部索引保留在工具环境.详见[离线流程](references/offline-analysis.md)和[分析配置](references/analysis-configuration.md).
 
-覆盖既有成果前保留可恢复副本,不修改无关手调内容.输出报告区分扫描事实,推断,结构检查,语义核对和实际视觉复核.最终图文可独立于过程目录阅读.
+更新检查通过后,替换既有成果前保留可恢复副本,不修改无关手调内容.交付后核对最终内容与链接,清理本轮已无用途的候选副本和空目录;失败诊断,必要备份及用户既有文件保留,不递归清空过程目录.输出报告区分扫描事实,推断,结构检查,语义核对和实际视觉复核.最终图文可独立于过程目录阅读.
 
 ## 限制与验证
+
+C source 支持严格 UTF-8/GB18030 解码,并显式记录有限的 ARM/CMSIS 注解和成对 C++ linkage 包装;不替换非法字节,不修改目标源码.其余语法错误仍停止完整验收,详细边界见[离线流程](references/offline-analysis.md).
 
 source 模式不能证明宏条件真值或目标 ABI;Python 动态分派可能未知;数字 HDL 只提供语法结构,不等于 elaboration.Verilog-A 尚未接入.扫描失败不静默换模式,也不运行用户程序,烧录或上传源码.
 

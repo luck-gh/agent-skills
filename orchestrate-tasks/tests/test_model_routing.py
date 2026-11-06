@@ -25,7 +25,7 @@ POLICY_FIELDS = {
 MODEL_FIELDS = {
     "model_id",
     "display_name",
-    "default_level_id",
+    "level_ids",
     "task_profile_ids",
     "default_reasoning_profile_id",
     "availability",
@@ -61,7 +61,7 @@ class ModelRoutingTests(unittest.TestCase):
         raw, catalog = read_catalog()
 
         self.assertEqual(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", raw)
-        self.assertEqual(2, catalog["schema_version"])
+        self.assertEqual(3, catalog["schema_version"])
         self.assertEqual(TOP_LEVEL_FIELDS, set(catalog))
         self.assertEqual(POLICY_FIELDS, set(catalog["selection_policy"]))
         for model in catalog["models"]:
@@ -94,7 +94,7 @@ class ModelRoutingTests(unittest.TestCase):
         _, catalog = read_catalog()
         candidates = [
             model for model in catalog["models"]
-            if model["default_level_id"] == "L2"
+            if "L2" in model["level_ids"]
             and "targeted-code-change" in model["task_profile_ids"]
         ]
         self.assertGreaterEqual(len(candidates), 2)
@@ -113,8 +113,14 @@ class ModelRoutingTests(unittest.TestCase):
         self.assertEqual(len(model_ids), len(set(model_ids)))
         self.assertEqual(len(display_names), len(set(display_names)))
         self.assertEqual(len(source_ids), len(set(source_ids)))
-        self.assertEqual({"L1", "L2", "L3", "L4"}, {model["default_level_id"] for model in models})
+        self.assertEqual(
+            {"L1", "L2", "L3", "L4"},
+            {level for model in models for level in model["level_ids"]},
+        )
         for model in models:
+            self.assertIsInstance(model["level_ids"], list)
+            self.assertTrue(model["level_ids"])
+            self.assertEqual(len(model["level_ids"]), len(set(model["level_ids"])))
             self.assertEqual("schema-gated", model["availability"])
             self.assertTrue(model["task_profile_ids"])
             self.assertTrue(model["source_ids"])

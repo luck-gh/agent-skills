@@ -765,7 +765,12 @@ def context(index, file, line, count, budget):
     if file not in index['files']:
         raise ValueError('context file must belong to the scanned scope')
     path = inside(Path(index['inventory']['root']), Path(index['inventory']['root']) / file)
-    lines = path.read_text(encoding='utf-8-sig').splitlines()
+    if path.suffix.lower() in {'.c', '.h'}:
+        from source_c import decode_source
+        content, _ = decode_source(path.read_bytes())
+    else:
+        content = path.read_text(encoding='utf-8-sig')
+    lines = content.splitlines()
     if line < 1 or line > len(lines):
         raise ValueError('context line out of range')
     records = [f'{i+1}: {value}' for i, value in enumerate(lines) if line-1 <= i < line-1+count]

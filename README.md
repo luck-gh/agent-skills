@@ -8,27 +8,25 @@
 
 ## 交给 Agent 安装
 
-推荐把下面整段提示词复制给你的 Agent.提示词第一行是唯一需要按安装位置修改的部分:
+把下面整段提示词复制给 Agent.第一行保留 `物理目录: 默认` 时,按来源选择标准受管目录或独立 Git 目录;也可改成绝对路径,例如 `物理目录: D:\AgentSkills\agent-skills`,在该处保留完整 Git 仓库,宿主通过链接使用 Skill.
 
-- 保持 `物理目录：默认`:Agent 会把 Skill 实体文件直接安装到自身要求的用户级 Skill 目录.
-- 需要把主体文件放到其他磁盘:只把第一行改成绝对路径,例如 `物理目录：D:\AgentSkills\agent-skills`.此时 Skill 主体文件保存在该目录,Agent 的应用目录只保留 Junction 或符号链接入口,不会在 C 盘重复保存主体文件.
+安装包含更新检查接入:使用这批 Skills 时复用缓存,默认每 24 小时最多重新联网检查一次;缓存命中不扫描 Skills,查询 Git 或输出长报告.同一会话已知未到期时连检查命令也不重复调用,手动刷新和安装变化除外.发现更新先询问,不自动覆盖;说“最近不更新,只检查”后仍检查并报告,停止升级询问,直到你要求恢复.没有运行 Agent 或没有使用这批 Skills 时不会自行定时唤醒.
 
 ```text
-物理目录：默认
+物理目录: 默认
 
-请从 https://github.com/luck-gh/agent-skills 安装全部 Agent Skills,并完成可用性验证.我授权你创建本次安装所需的目录,下载指定仓库,安装 Skill,创建必要的 Junction 或符号链接,以及创建 new-skills/settings.json;不要覆盖、删除或替换任何既有的非链接目录或未知文件,遇到冲突时停止并报告.
+请从 https://github.com/luck-gh/agent-skills 安装全部 Agent Skills,并完成可用性与自动更新检查接入.我授权创建所需目录,下载/安装指定仓库,创建必要的 Junction 或符号链接,创建 new-skills/settings.json,以及在当前 Agent 实际生效的用户级指令中新增或更新本安装专属的自动检查块.我授权安装初始化及后续按 24 小时成功缓存进行网络请求/Git fetch 和用户级更新状态写入;升级 Skill 内容仍需我的明确同意.保留其他指令和用户文件,不要覆盖既有非链接目录或未知对象,遇到冲突停止并报告.
 
-请按以下要求执行:
-
-1. 先确认当前 Agent 实际支持的用户级 Skill 发现目录,把它作为 usage_root,不要根据偶然存在的目录猜测.如果当前 Agent 是 Codex,用户级目录使用 `$HOME/.agents/skills`;Windows 对应 `%USERPROFILE%\.agents\skills`.
-2. 只把名称为 lowercase hyphen-case 且包含 SKILL.md 的顶层实体目录视为 Skill,不要安装 docs 或仓库根文件.若仓库提供 skills-manifest.json,用它核对发布目录和哈希;没有 manifest 时按实际 Skill 目录核对,不要猜测或补造清单.
-3. 如果第一行是“物理目录：默认”,把 physical_root 设为 usage_root,直接使用最新版 skills CLI 将全部 Skill 安装到当前 Agent 的用户级目录.不再询问物理目录,也不创建额外链接.
-4. 如果第一行给出了绝对路径,把该路径作为 physical_root.将仓库内容安装为该目录下的实体 Skill,并为每个 Skill 在 `<usage_root>/<skill-name>` 创建指向 `<physical_root>/<skill-name>` 的目录入口.Windows 使用 Junction,其他系统使用目录符号链接.优先使用仓库中 `new-skills/scripts/ensure_skill_entry.py` 的 inspect 和 ensure 流程;创建前检查冲突,不得用复制产生第二份 Skill.
-5. 在实体 `new-skills` 目录内创建 settings.json,只写入已验证的 physical_root 和 usage_root 两个绝对目录.如果文件已存在且内容不同,先报告差异,不要直接覆盖.
-6. 安装后核对每个入口都精确指向对应实体目录,每个 Skill 都包含 SKILL.md,并运行可用的 Skill 校验.报告实际 physical_root、usage_root、已安装 Skill、入口类型、冲突和未完成项.如果当前 Agent 没有立即发现新 Skill,提示我重启 Agent.
+1. 先确认当前 Agent 的官方 Skill 发现目录及用户级指令加载机制.Codex 的 usage_root 为 $HOME/.agents/skills;全局指令按实际 CODEX_HOME 下有效的 AGENTS.override.md/AGENTS.md 确定,默认 CODEX_HOME 为 $HOME/.codex.不要根据偶然存在的目录猜测,也不要写入被 override 遮蔽的文件.
+2. 只把名称为 lowercase hyphen-case 且包含 SKILL.md 的顶层实体目录注册为 Skill.有 skills-manifest.json 时核对发布目录与内容哈希,没有时按实际目录核对,不补造清单.
+3. 默认目录且来源为 luck-gh/agent-skills 时,使用 skills@1.5.21 CLI,明确 --global --skill "*" --agent <当前宿主ID>,不选择其他宿主.实体 physical_root 为 $HOME/.agents/skills,usage_root 按宿主确定;两者相同不建链接,不同则核对安装器创建的入口.不得把链接目录误记成实体.
+4. 指定绝对路径时,完整 git clone 指定仓库到该 physical_root,保留 .git,核对 Git 根等于目标目录,origin/分支/upstream 正确.默认目录但来源不是 luck-gh/agent-skills 时,将完整 clone 放入 $HOME/agent-skill-repositories/<仓库名>,作为 physical_root.只为 Skill 创建指向唯一实体的发现入口,不复制第二份内容;Windows 用 Junction,其他系统用目录符号链接.优先使用 new-skills/scripts/ensure_skill_entry.py 的 inspect/ensure 流程.已有目录冲突时不擅自初始化或覆盖.
+5. 按实体 new-skills/references/update-installation.md 完成配置,更新初始化及宿主指令接入.确认 Python 和所需依赖可用,只将已验证的 physical_root/usage_root 写入 settings.json.立即运行 manage_updates.py check --force --json,公共安装须核对真实 CLI lock 和每个已安装 Skill 的持久化基线;Git 安装须核对 upstream 和干净工作树.有阻断就报告更新接入未完成.
+6. 按该引用将实际路径与解释器填入本安装的用户级指令块,保留块外内容.宿主没有可验证的用户级指令机制时不要假称支持自动触发,明确报告缺口.再次 check --automatic 应只返回简短缓存摘要和 next_check_at;新会话使用一个普通 Skill 时应实际调用检查器.当前无法新开会话时单列此项待验证.
+7. 核对每个入口的准确实体与可读 SKILL.md,运行可用校验.报告实际目录,已安装 Skill,入口类型,更新模式,基线,自动检查接入与待验证项.必要时提示重启 Agent,不要仅凭安装命令成功就称自动更新流程已完成.
 ```
 
-[Codex 官方文档](https://developers.openai.com/codex/skills#where-codex-loads-local-skills)支持从 `$HOME/.agents/skills` 发现用户级 Skill,并支持链接形式的 Skill 目录.其他 Agent 的目录可能不同,所以提示词要求 Agent 先按自身契约确认 `usage_root`.
+[Codex Skills 官方说明](https://developers.openai.com/codex/skills)与[全局指令规则](https://developers.openai.com/codex/guides/agents-md)分别定义发现入口和指令加载.其他 Agent 须核对自己的契约.自动接入负责触发检查,更新算法与询问规则由已安装的 new-skills 统一维护.
 
 ## Python 环境与依赖
 
@@ -112,19 +110,23 @@ npx skills@1.5.21 add luck-gh/agent-skills --skill new-skills --global
 
 建议安装 `new-skills`,以使用本仓库统一的安装位置管理,更新检查和受保护升级流程.
 
-## 升级
+## 检查与升级
 
-使用最新版 CLI 升级一个已安装的 Skill:
+按上方提示词完成安装后,普通使用会触发带 24 小时成功缓存的检查.也可以直接告诉 Agent:
 
-```powershell
-npx skills@latest update new-skills --global
+```text
+使用 $new-skills,立即检查已安装 Skills 的更新,报告变化与冲突,先不要升级.
 ```
 
-升级全部全局 Skill:
-
-```powershell
-npx skills@latest update --global
+```text
+最近不更新 Skills,只检查并报告,暂停询问是否升级.
 ```
+
+```text
+使用 $new-skills,升级已安装 Skills,保留本机配置并完成必要的入口交接.遇到局部修改或来源冲突先保留并报告,不要提交或推送 Git.
+```
+
+恢复升级询问时明确说“恢复 Skills 更新询问”.仅运行手动安装命令不会自动建立基线或宿主触发入口;须补完上方接入步骤.直接运行第三方 CLI 的 update 不经过本仓库的配置保留与覆盖保护,不能替代上述受保护流程.
 
 ## 发布信息
 

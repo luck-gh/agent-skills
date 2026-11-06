@@ -1,6 +1,8 @@
 # New-skills local settings
 
-只在缺少当前任务必需的 physical root 或 usage root,或用户要求配置默认值时读取本说明.显式路径始终优先;不需要 discovery 的任务不为此询问 usage root.
+只在系统级任务缺少必需的 physical root 或 usage root,或用户明确要求配置系统级默认值时读取本说明.先按入口确定作用域,显式路径始终优先;不需要 discovery 的任务不为此询问 usage root.
+
+项目级创建和编辑使用显式项目内路径,已有实体或 `<project-root>/skills/<name>`,不读取或写入这里的 settings,即使文件已存在也不采用其全局目录.缺少项目根时只确认项目根,不回退到全局设置.本配置仍仅保存系统级的两个路径候选,不添加 scope 或项目配置映射.已有系统级 Skill 的默认行为不变.
 
 ## Location and fields
 

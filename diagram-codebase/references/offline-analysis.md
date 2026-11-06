@@ -65,6 +65,8 @@ scan 内置准备检查,不新增必跑的预检命令.按稳定顺序汇总所�
 
 source 不使用环境配置,不为它创建配置文件.已选择 configured 且需要参数/持久化选择或复用分析配置时,读取入口直接链接的 [analysis-configuration.md](analysis-configuration.md):先复用,再按缺项定向提取,重要缺项/冲突询问用户.新建统一 analysis-config.json,通过 --mode configured --config PATH 消费,不另交付 flags 或来源文件;保存范围不是支持未接入的语言参数.配置与过程文件分开,不自动迁移用户原生输入.
 
+C source 文本先严格按 UTF-8(含 BOM)解码,失败后仅尝试严格 GB18030,并在结果和诊断中标明所用编码;两者均失败即停止,不替换字节,不修改目标文件.context 使用相同 C 解码规则.用于解析的 UTF-8 视图中,仅将行首 ARM `__align(<整数>)`,CMSIS `__I`/`__O`/`__IO`,以及成对 `#ifdef __cplusplus` 的 `extern "C" {`/`}` 包装记录为不透明注解并以等长空白表示,保留行号和视图偏移;原文仍用于签名和片段.这不是宏展开,不推断注解的 ABI 效果,不处理任意编译器扩展.未成对包装和其他真实语法错误保持 partial,匿名 missing token 也输出定位诊断.
+
 ## C configured 配置
 
 只有需要 C 参数时才取配置;没有额外参数需求可直接 scan,采用解析器默认环境并在成果说明边界.不要把缺配置的报错或默认环境解析成功当作目标配置已确认.有宏,目标或头文件等语义需求时,优先使用已有 compile_commands.json 的 arguments 数组:--compdb PATH;用户已有标准 flags 原位 --flags PATH.不执行 command,不猜 Windows shell 转义.同一源码有多个配置时要求先明确一个,缺失所选 TU 时停止.不运行 Bear/make 来生成数据库,也不运行编译器探测程序.

@@ -2,12 +2,16 @@
 
 公开入口:
   check --json
+  check --automatic --json
   check --force --json
+  preference --mode ask|check-only --authorized --json
   apply --expected-update-id <id> --authorized --json
+  retire --old-skill <old> --replacement-skill <new> --expected-update-id <id> --authorized --json
 
 脚本使用 Python 标准库.它在 Git 真源模式中只允许 fast-forward 更新,在公共
 安装模式中按公开 manifest 仅更新已安装且发生变化的 Skill,并提供本地修改保护,
-settings 保留,失败回滚和自更新提示.
+settings 保留,失败回滚和自更新提示.显式 retire 只收尾已完成改名的安装记录,
+不推断改名关系,不安装或删除 Skill,也不修改发现入口.
 """
 
 from __future__ import annotations
@@ -16,6 +20,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -36,6 +41,7 @@ TTL = timedelta(hours=24)
 IGNORED_NAMES = {"settings.json", "__pycache__", ".pytest_cache", ".git", "test-output"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
 PRIVATE_RELATIVE_DIRECTORIES = {("tools", "local")}
+PRESERVED_LOCAL_DIRECTORIES = (Path("tools/local"), Path("test-output"))
 
 
 class UpdateError(RuntimeError):
@@ -63,26 +69,60 @@ def _empty_state() -> dict[str, object]:
         "public_snapshot_id": None,
         "installation_baselines": {},
         "failure_summary": None,
+        "installation_root": None,
+        "cache_context": None,
+        "check_result": None,
+        "update_preference": "ask",
     }
 
 
 def load_state(path: Path) -> dict[str, object]:
-    if not path.exists():
-        return _empty_state()
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
+    except FileNotFoundError:
         return _empty_state()
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise UpdateError(f"update state cannot be read: {path}") from error
     if type(payload) is not dict or payload.get("schema_version") != SCHEMA_VERSION:
-        return _empty_state()
+        raise UpdateError("update state must use schema_version 1")
     baselines = payload.get("installation_baselines")
     if type(baselines) is not dict or any(
         not isinstance(name, str) or not isinstance(digest, str)
         for name, digest in baselines.items()
     ):
-        return _empty_state()
+        raise UpdateError("update state has invalid installation baselines")
     clean = _empty_state()
-    clean.update({key: payload.get(key) for key in clean if key != "schema_version"})
+    clean.update(payload)
+    if clean["update_preference"] not in ("ask", "check-only"):
+        raise UpdateError("update state has an invalid update preference")
+    for key in ("cache_context", "check_result"):
+        if clean[key] is not None and type(clean[key]) is not dict:
+            raise UpdateError(f"update state has an invalid {key}")
+    if clean["last_check_at"] is not None and _parse_time(clean["last_check_at"]) is None:
+        raise UpdateError("update state has an invalid last_check_at")
+    if clean["installation_root"] is not None and not isinstance(clean["installation_root"], str):
+        raise UpdateError("update state has an invalid installation_root")
+    if clean["check_result"] is not None and clean["check_result"].get("status") not in (
+        "up_to_date", "update_available", "attention", "ahead", "diverged"
+    ):
+        raise UpdateError("update state has an invalid cached check status")
+    context = clean["cache_context"]
+    if context is not None and (
+        context.get("mode") not in ("git", "public")
+        or any(not isinstance(context.get(key), str) for key in ("physical_root", "usage_root"))
+    ):
+        raise UpdateError("update state has an invalid cache context")
+    result = clean["check_result"]
+    if result is not None:
+        if context is None or result.get("mode") != context["mode"] or not isinstance(result.get("update_id"), str):
+            raise UpdateError("cached check result does not match its context")
+        if result["mode"] == "public" and (
+            any(type(result.get(key)) is not list for key in ("updates", "available", "retired", "unmanaged"))
+            or type(result.get("blocked")) is not dict
+        ):
+            raise UpdateError("cached public check is missing its change lists")
+        if result["mode"] == "git" and (type(result.get("dirty")) is not bool or type(result.get("changed_paths")) is not list):
+            raise UpdateError("cached Git check is missing its worktree result")
     clean["installation_baselines"] = dict(baselines)
     return clean
 
@@ -101,6 +141,33 @@ def save_state(path: Path, payload: dict[str, object]) -> None:
         except OSError:
             pass
         raise
+
+
+def _read_metadata(path: Path) -> dict[str, object]:
+    """严格读取待修改的元数据,保留未知字段并拒绝损坏或链接文件."""
+
+    try:
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode) or path.is_symlink() or _is_reparse(path):
+            raise UpdateError(f"metadata must be a regular file: {path.name}")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise UpdateError(f"metadata cannot be read: {path.name}") from error
+    if type(payload) is not dict:
+        raise UpdateError(f"metadata must be a JSON object: {path.name}")
+    return payload
+
+
+def _require_absent(path: Path) -> None:
+    """仅接受 lstat 明确的缺失,不把断链或权限错误当成已清理."""
+
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return
+    except OSError as error:
+        raise UpdateError(f"old skill path absence is unknown: {path}") from error
+    raise UpdateError(f"old skill path still exists: {path}")
 
 
 def _parse_time(value: object) -> datetime | None:
@@ -263,10 +330,10 @@ def fetch_manifest(opener: Callable[..., object] = urlopen) -> dict[str, object]
     if not isinstance(payload.get("snapshot_id"), str) or type(payload.get("skills")) is not dict:
         raise UpdateError("public manifest is missing snapshot_id or skills")
     for name, item in payload["skills"].items():
-        if not isinstance(name, str) or type(item) is not dict or item.get("path") != name:
+        if not isinstance(name, str) or re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name) is None or type(item) is not dict or item.get("path") != name:
             raise UpdateError("public manifest contains an invalid skill entry")
         digest = item.get("content_sha256")
-        if not isinstance(digest, str) or len(digest) != 64:
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
             raise UpdateError("public manifest contains an invalid content hash")
     return payload
 
@@ -275,22 +342,23 @@ def _lock_entries() -> dict[str, object]:
     path = Path.home() / ".agents" / ".skill-lock.json"
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
+    except FileNotFoundError:
         return {}
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise UpdateError("installer lock cannot be read") from error
     if type(payload) is not dict or payload.get("version") != 3 or type(payload.get("skills")) is not dict:
-        return {}
+        raise UpdateError("installer lock must use version 3 with skills records")
     return payload["skills"]
 
 
 def _source_is_public(entry: object, name: str) -> bool:
-    if type(entry) is not dict:
+    if type(entry) is not dict or re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name) is None:
         return False
     path = entry.get("skillPath")
     return (
         entry.get("sourceType") == "github"
         and str(entry.get("source", "")).lower() == PUBLIC_REPOSITORY.lower()
-        and isinstance(path, str)
-        and path.strip("/").split("/")[-1] == name
+        and path == f"{name}/SKILL.md"
     )
 
 
@@ -361,25 +429,97 @@ class UpdateManager:
         self.manifest_opener = manifest_opener
         self.lock_entries = lock_entries
 
-    def check(self, *, force: bool = False) -> dict[str, object]:
+    def _context(self, physical_root: Path, usage_root: Path, root: Path | None) -> dict[str, object]:
+        """读取本地安装身份,使路径,来源或本地内容变化立即使网络缓存失效."""
+
+        context = {"physical_root": str(physical_root), "usage_root": str(usage_root)}
+        if root is not None:
+            context.update({
+                "mode": "git", "git_root": str(root),
+                "head": _git_value(root, "rev-parse", "HEAD"),
+                "branch": _git_value(root, "branch", "--show-current"),
+                "upstream": _git_value(root, "rev-parse", "--abbrev-ref", "@{upstream}"),
+                "remotes_sha256": hashlib.sha256(_git_value(root, "remote", "-v").encode("utf-8")).hexdigest(),
+                "worktree": _git_value(root, "status", "--porcelain=v1"),
+            })
+        else:
+            canonical = (Path.home() / ".agents" / "skills").resolve(strict=False)
+            if physical_root != canonical:
+                raise UpdateError(f"public updates require canonical physical_root {canonical}")
+            entries = _lock_entries() if self.lock_entries is None else self.lock_entries
+            encoded = json.dumps(entries, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            context.update({
+                "mode": "public", "lock_sha256": hashlib.sha256(encoded).hexdigest(),
+                "local_hashes": {
+                    name: content_hash(physical_root / name)
+                    for name, entry in sorted(entries.items())
+                    if _source_is_public(entry, name) and (physical_root / name).is_dir()
+                },
+            })
+        return context
+
+    @staticmethod
+    def _bind_installation(state: dict[str, object], physical_root: Path, mode: str) -> None:
+        """基线属于同一个实体根,不能随 settings 切换到另一份安装."""
+
+        previous = state["installation_root"]
+        context = state["cache_context"]
+        if previous != str(physical_root) or (context is not None and context["mode"] != mode):
+            state["installation_baselines"] = {}
+            state["public_snapshot_id"] = None
+        state["installation_root"] = str(physical_root)
+
+    @staticmethod
+    def _check_output(state: dict[str, object], *, cached: bool, automatic: bool = False) -> dict[str, object]:
+        result = state["check_result"]
+        attention = result["status"] in {"attention", "ahead", "diverged"} or result.get("dirty", False)
+        attention = attention or bool(result.get("blocked") or result.get("unmanaged") or result.get("retired"))
+        notification = "none"
+        if not cached:
+            if attention:
+                notification = "report"
+            elif result["status"] == "update_available":
+                notification = "ask" if state["update_preference"] == "ask" else "report"
+        output = {
+            **result, "cached": cached, "checked_at": state["last_check_at"],
+            "update_preference": state["update_preference"], "notification": notification,
+        }
+        if automatic:
+            output["next_check_at"] = (_parse_time(state["last_check_at"]) + TTL).isoformat().replace("+00:00", "Z")
+            if cached:
+                return {key: output[key] for key in (
+                    "schema_version", "status", "cached", "checked_at", "next_check_at", "notification"
+                )}
+            if result["mode"] == "public":
+                del output["current_hashes"]
+        return output
+
+    def check(self, *, force: bool = False, automatic: bool = False) -> dict[str, object]:
         state = load_state(self.state_file)
-        checked_at = _parse_time(state.get("last_check_at"))
         current_time = self.now().astimezone(timezone.utc)
-        if not force and checked_at is not None and current_time - checked_at < TTL:
-            return {
-                "schema_version": SCHEMA_VERSION,
-                "status": "ttl_skipped",
-                "checked_at": state["last_check_at"],
-                "update_id": state.get("public_snapshot_id"),
-                "failure_summary": state.get("failure_summary"),
-            }
-        state["last_check_at"] = current_time.isoformat().replace("+00:00", "Z")
         try:
-            physical_root, _ = load_settings(self.skill_root)
+            physical_root, usage_root = load_settings(self.skill_root)
+            checked_at = _parse_time(state["last_check_at"])
+            cache_in_time = checked_at is not None and timedelta(0) <= current_time - checked_at < TTL
+            if (
+                automatic and not force and state["check_result"] is not None and cache_in_time
+                and state["installation_root"] == str(physical_root)
+                and state["cache_context"]["physical_root"] == str(physical_root)
+                and state["cache_context"]["usage_root"] == str(usage_root)
+            ):
+                # 自动调用只复用带时间的快照;不启动 Git,扫描内容或重新读取安装器记录.
+                return self._check_output(state, cached=True, automatic=True)
             root = _git_root(physical_root)
+            context = self._context(physical_root, usage_root, root)
+            if (
+                not force and state["check_result"] is not None and context == state["cache_context"]
+                and state["installation_root"] == str(physical_root)
+                and cache_in_time
+            ):
+                return self._check_output(state, cached=True, automatic=automatic)
+            self._bind_installation(state, physical_root, context["mode"])
             if root is not None:
                 result = git_check(root)
-                state["failure_summary"] = None
             else:
                 manifest = fetch_manifest(self.manifest_opener)
                 result = public_check(
@@ -389,18 +529,35 @@ class UpdateManager:
                     lock_entries=self.lock_entries,
                 )
                 state["public_snapshot_id"] = manifest["snapshot_id"]
-                state["failure_summary"] = None
-        except UpdateError as error:
+        except (UpdateError, OSError) as error:
             state["failure_summary"] = str(error)[:500]
+            state["check_result"] = None
             save_state(self.state_file, state)
             return {
                 "schema_version": SCHEMA_VERSION,
                 "status": "error",
                 "error": str(error),
-                "non_blocking": True,
+                "non_blocking": True, "cached": False, "notification": "report",
+                "checked_at": state["last_check_at"], "update_preference": state["update_preference"],
             }
+        state["last_check_at"] = current_time.isoformat().replace("+00:00", "Z")
+        state["cache_context"] = context
+        state["check_result"] = result
+        state["failure_summary"] = None
         save_state(self.state_file, state)
-        return result
+        return self._check_output(state, cached=False, automatic=automatic)
+
+    def preference(self, mode: str, *, authorized: bool) -> dict[str, object]:
+        """保存用户明确的询问偏好,不执行网络检查或安装."""
+
+        if not authorized:
+            raise UpdateError("preference requires --authorized")
+        if mode not in {"ask", "check-only"}:
+            raise UpdateError("preference mode must be ask or check-only")
+        state = load_state(self.state_file)
+        state["update_preference"] = mode
+        save_state(self.state_file, state)
+        return {"schema_version": SCHEMA_VERSION, "status": "preference_saved", "update_preference": mode}
 
     def apply(self, expected_update_id: str, *, authorized: bool) -> dict[str, object]:
         if not authorized:
@@ -408,8 +565,108 @@ class UpdateManager:
         physical_root, _ = load_settings(self.skill_root)
         root = _git_root(physical_root)
         if root is not None:
-            return self._apply_git(root, expected_update_id)
+            state = load_state(self.state_file)
+            result = self._apply_git(root, expected_update_id)
+            if result["status"] == "updated":
+                state["check_result"] = None
+                save_state(self.state_file, state)
+            return result
         return self._apply_public(physical_root, expected_update_id)
+
+    def retire(
+        self,
+        old_skill: str,
+        replacement_skill: str,
+        expected_update_id: str,
+        *,
+        authorized: bool,
+    ) -> dict[str, object]:
+        """在改名已完成后收尾公开安装记录,不触碰 Skill 内容或链接."""
+
+        if not authorized:
+            raise UpdateError("retire requires --authorized")
+        for name in (old_skill, replacement_skill):
+            if not isinstance(name, str) or len(name) > 64 or re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name) is None:
+                raise UpdateError("retire requires valid lowercase hyphen-case skill names")
+        if old_skill == replacement_skill:
+            raise UpdateError("old and replacement skill names must differ")
+        physical_root, usage_root = load_settings(self.skill_root)
+        canonical = (Path.home() / ".agents" / "skills").resolve(strict=False)
+        if physical_root != canonical:
+            raise UpdateError(f"public retirement requires canonical physical_root {canonical}")
+        for root in dict.fromkeys((physical_root, usage_root)):
+            _require_absent(root / old_skill)
+        manifest = fetch_manifest(self.manifest_opener)
+        if manifest["snapshot_id"] != expected_update_id:
+            raise UpdateError("public snapshot changed after check; run check again")
+        skills = manifest["skills"]
+        if old_skill in skills or replacement_skill not in skills:
+            raise UpdateError("public snapshot must retire the old name and contain the replacement")
+        state = _read_metadata(self.state_file)
+        baselines = state.get("installation_baselines")
+        if state.get("installation_root") != str(physical_root):
+            raise UpdateError("retirement requires installation baselines bound to the physical root")
+        if state.get("schema_version") != SCHEMA_VERSION or type(baselines) is not dict or any(
+            not isinstance(name, str) or not isinstance(digest, str) for name, digest in baselines.items()
+        ):
+            raise UpdateError("retirement requires valid persisted installation baselines")
+        lock_path = Path.home() / ".agents" / ".skill-lock.json"
+        lock = _read_metadata(lock_path)
+        entries = lock.get("skills")
+        if lock.get("version") != 3 or type(entries) is not dict:
+            raise UpdateError("retirement requires a valid version 3 installer lock")
+        if not _source_is_public(entries.get(replacement_skill), replacement_skill):
+            raise UpdateError("replacement skill is not managed by the public repository")
+        if old_skill in entries and not _source_is_public(entries[old_skill], old_skill):
+            raise UpdateError("old skill installer source does not match the public repository")
+        try:
+            actual = content_hash(physical_root / replacement_skill)
+        except OSError as error:
+            raise UpdateError("replacement skill content cannot be verified") from error
+        if actual != skills[replacement_skill]["content_sha256"] or actual != baselines.get(replacement_skill):
+            raise UpdateError("replacement content, public hash and persisted baseline must match")
+        result = {
+            "schema_version": SCHEMA_VERSION,
+            "mode": "public",
+            "update_id": manifest["snapshot_id"],
+            "old_skill": old_skill,
+            "replacement_skill": replacement_skill,
+        }
+        if old_skill not in baselines:
+            if old_skill in entries:
+                raise UpdateError("old skill baseline is missing but its installer record remains")
+            return {**result, "status": "no_changes"}
+        new_state = {
+            **state, "check_result": None,
+            "installation_baselines": {name: digest for name, digest in baselines.items() if name != old_skill},
+        }
+        new_lock = {**lock, "skills": {name: entry for name, entry in entries.items() if name != old_skill}}
+        changes = []
+        if old_skill in entries:
+            changes.append((lock_path, lock, new_lock))
+        changes.append((self.state_file, state, new_state))
+        try:
+            for path, original, updated in changes:
+                save_state(path, updated)
+                if _read_metadata(path) != updated:
+                    raise UpdateError("retirement metadata verification failed")
+        except Exception as error:
+            restored = True
+            for path, original, updated in reversed(changes):
+                try:
+                    current = _read_metadata(path)
+                    if current != original:
+                        if current != updated:
+                            raise UpdateError("retirement metadata has an unexpected value")
+                        save_state(path, original)
+                    if _read_metadata(path) != original:
+                        raise UpdateError("retirement metadata restoration failed")
+                except Exception:
+                    restored = False
+            if not restored:
+                raise UpdateError("retirement_metadata_state_unknown; inspect installer lock and update state") from error
+            raise UpdateError("retirement metadata update failed; original records restored") from error
+        return {**result, "status": "retired"}
 
     def _apply_git(self, root: Path, expected: str) -> dict[str, object]:
         status = git_check(root)
@@ -431,6 +688,7 @@ class UpdateManager:
         if physical_root != canonical:
             raise UpdateError(f"public updates require canonical physical_root {canonical}")
         state = load_state(self.state_file)
+        self._bind_installation(state, physical_root, "public")
         manifest = fetch_manifest(self.manifest_opener)
         if manifest["snapshot_id"] != expected:
             raise UpdateError("public snapshot changed after check; run check again")
@@ -442,7 +700,7 @@ class UpdateManager:
         )
         updates = status["updates"]
         if not updates:
-            return {**status, "status": "no_changes"}
+            return {**status, "status": "attention" if status["status"] == "attention" else "no_changes"}
         lock_path = Path.home() / ".agents" / ".skill-lock.json"
         npx = "npx.cmd" if os.name == "nt" else "npx"
         with tempfile.TemporaryDirectory(prefix="new-skills-update-") as temporary:
@@ -451,6 +709,22 @@ class UpdateManager:
             settings_absent: set[str] = set()
             for name in updates:
                 target = physical_root / name
+                # 本机环境也在备份范围内,拒绝链接以免复制到安装根之外.
+                pending = [target]
+                while pending:
+                    directory = pending.pop()
+                    for entry in os.scandir(directory):
+                        path = Path(entry.path)
+                        if entry.is_symlink() or _is_reparse(path):
+                            raise UpdateError(f"linked local installation cannot be backed up: {path}")
+                        if entry.is_dir(follow_symlinks=False):
+                            pending.append(path)
+                        elif not entry.is_file(follow_symlinks=False):
+                            raise UpdateError(f"non-regular local installation resource: {path}")
+                for relative in PRESERVED_LOCAL_DIRECTORIES:
+                    local_directory = target / relative
+                    if local_directory.exists() and not local_directory.is_dir():
+                        raise UpdateError(f"local runtime path must be a directory: {local_directory}")
                 shutil.copytree(target, backup_root / name)
                 local_settings = target / "settings.json"
                 if local_settings.is_file():
@@ -460,19 +734,36 @@ class UpdateManager:
             had_lock = lock_path.is_file()
             if had_lock:
                 shutil.copy2(lock_path, backup_root / ".skill-lock.json")
-            command = [npx, f"skills@{INSTALLER_VERSION}", "add", PUBLIC_REPOSITORY, "-g", "-y"]
+            command = [npx, f"skills@{INSTALLER_VERSION}", "add", PUBLIC_REPOSITORY, "-g", "-y", "--agent", "universal"]
             for name in updates:
                 command.extend(["--skill", name])
             result = _run(command)
             try:
                 if result.returncode != 0:
                     raise UpdateError((result.stderr.strip() or "skills installer failed")[:500])
+                for name in updates:
+                    # 先确认新实体与父目录没有链接,再恢复本机文件.
+                    if content_hash(physical_root / name) != manifest["skills"][name]["content_sha256"]:
+                        raise UpdateError(f"updated content hash mismatch: {name}")
+                    local_settings = physical_root / name / "settings.json"
+                    if os.path.lexists(local_settings) and (local_settings.is_symlink() or _is_reparse(local_settings)):
+                        raise UpdateError(f"updated settings must not be a link: {name}")
                 for name, data in settings.items():
                     (physical_root / name / "settings.json").write_bytes(data)
                 for name in settings_absent:
                     local_settings = physical_root / name / "settings.json"
                     if local_settings.is_file():
                         local_settings.unlink()
+                for name in updates:
+                    for relative in PRESERVED_LOCAL_DIRECTORIES:
+                        saved = backup_root / name / relative
+                        if not saved.is_dir():
+                            continue
+                        destination = physical_root / name / relative
+                        if os.path.lexists(destination):
+                            raise UpdateError(f"updated package conflicts with local runtime directory: {name}/{relative.as_posix()}")
+                        destination.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copytree(saved, destination)
                 validator = physical_root / "new-skills" / "scripts" / "validate_skill.py"
                 validation = _run(
                     [sys.executable, "-X", "utf8", "-B", str(validator), "--json", *[str(physical_root / name) for name in updates]]
@@ -499,6 +790,7 @@ class UpdateManager:
                 raise
         state["public_snapshot_id"] = manifest["snapshot_id"]
         state["failure_summary"] = None
+        state["check_result"] = None
         save_state(self.state_file, state)
         return {
             **status,
@@ -513,11 +805,22 @@ def _parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", required=True)
     check = commands.add_parser("check")
     check.add_argument("--force", action="store_true")
+    check.add_argument("--automatic", action="store_true")
     check.add_argument("--json", action="store_true", required=True)
+    preference = commands.add_parser("preference")
+    preference.add_argument("--mode", choices=("ask", "check-only"), required=True)
+    preference.add_argument("--authorized", action="store_true", required=True)
+    preference.add_argument("--json", action="store_true", required=True)
     apply = commands.add_parser("apply")
     apply.add_argument("--expected-update-id", required=True)
     apply.add_argument("--authorized", action="store_true", required=True)
     apply.add_argument("--json", action="store_true", required=True)
+    retire = commands.add_parser("retire")
+    retire.add_argument("--old-skill", required=True)
+    retire.add_argument("--replacement-skill", required=True)
+    retire.add_argument("--expected-update-id", required=True)
+    retire.add_argument("--authorized", action="store_true", required=True)
+    retire.add_argument("--json", action="store_true", required=True)
     return parser
 
 
@@ -526,9 +829,13 @@ def main(argv: list[str] | None = None) -> int:
     manager = UpdateManager(Path(__file__).resolve().parents[1])
     try:
         if args.command == "check":
-            payload = manager.check(force=args.force)
-        else:
+            payload = manager.check(force=args.force, automatic=args.automatic)
+        elif args.command == "apply":
             payload = manager.apply(args.expected_update_id, authorized=args.authorized)
+        elif args.command == "preference":
+            payload = manager.preference(args.mode, authorized=args.authorized)
+        else:
+            payload = manager.retire(args.old_skill, args.replacement_skill, args.expected_update_id, authorized=args.authorized)
     except UpdateError as error:
         payload = {"schema_version": SCHEMA_VERSION, "status": "error", "error": str(error)}
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")))

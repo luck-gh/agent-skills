@@ -1,0 +1,7 @@
+interface:
+  display_name: "任务编排与迭代接力"
+  short_description: "默认当前任务拆给内部 Agent 并一次性交付,明确要求时才委派新任务或迭代"
+  default_prompt: "使用 $orchestrate-tasks 执行编排.沿用我已明确的选择;尚未选择时由当前任务拆分给内部子 Agent,完成本批整合,验证和必要文档后统一交付,不自动创建 Codex 任务或接力."
+
+policy:
+  allow_implicit_invocation: false

@@ -67,6 +67,67 @@ class SkillValidatorTests(unittest.TestCase):
         self.assertEqual("ok", payload["status"], payload["issues"])
         self.assertEqual([], payload["issues"])
 
+    def test_project_skill_create_and_edit_ignore_global_settings(self) -> None:
+        """显式项目实体可原地验收,相邻全局设置与同名系统实体保持原样."""
+        with tempfile.TemporaryDirectory(prefix="project-skill-") as temporary:
+            root = Path(temporary)
+            global_root = root / "system-skills"
+            usage = root / "discovery"
+            usage.mkdir()
+            system_skill = write_skill(global_root)
+            settings = root / "lifecycle" / "settings.json"
+            settings.parent.mkdir()
+            settings.write_text(json.dumps({
+                "physical_root": str(global_root), "usage_root": str(usage),
+            }, indent=2) + "\n", encoding="utf-8")
+            protected = {
+                path: path.read_bytes()
+                for path in [settings, *system_skill.rglob("*")] if path.is_file()
+            }
+            project_skill = write_skill(root / "project" / "skills")
+            readme = project_skill / "README.md"
+            readme.write_text("# Usage\n[Entry](SKILL.md)\n", encoding="utf-8")
+            sentinel = project_skill / "user-notes.txt"
+            sentinel.write_bytes(b"existing user work\n")
+            for edit in (False, True):
+                if edit:
+                    with (project_skill / "SKILL.md").open("a", encoding="utf-8") as output:
+                        output.write("\nReport missing input before analysis.\n")
+                payload = self.validator.validate_skills([str(project_skill)])
+                self.assertEqual("ok", payload["status"], payload["issues"])
+                self.assertEqual(b"existing user work\n", sentinel.read_bytes())
+                self.assertEqual([], list(usage.iterdir()))
+                self.assertEqual(protected, {path: path.read_bytes() for path in protected})
+
+    def test_project_input_is_explicit_and_skill_runs_after_isolated_copy(self) -> None:
+        """项目文件通过参数输入,复制后的 Skill 无需父目录实现或内嵌项目事实."""
+        with tempfile.TemporaryDirectory(prefix="project-input-") as temporary:
+            root = Path(temporary)
+            skill = write_skill(root / "project" / "skills")
+            script = skill / "scripts" / "check.py"
+            script.write_text(
+                '"""读取显式传入的日志,用于隔离输入契约验收."""\n'
+                "import sys\nfrom pathlib import Path\n"
+                "print(Path(sys.argv[1]).read_text(encoding='utf-8').strip())\n",
+                encoding="utf-8",
+            )
+            source = root / "project" / "build.log"
+            source.write_text("fixture build fact\n", encoding="utf-8")
+            isolated = root / "standalone" / skill.name
+            shutil.copytree(skill, isolated)
+            self.assertEqual([], self.validator.validate_skill(isolated))
+            self.assertFalse(any(
+                b"fixture build fact" in path.read_bytes()
+                for path in isolated.rglob("*") if path.is_file()
+            ))
+            result = subprocess.run(
+                [sys.executable, "-X", "utf8", "-B",
+                 str(isolated / "scripts" / "check.py"), str(source)],
+                cwd=isolated, capture_output=True, text=True, encoding="utf-8",
+            )
+            self.assertEqual((0, "fixture build fact"),
+                             (result.returncode, result.stdout.strip()), result.stderr)
+
     def test_frontmatter_links_and_openai_metadata_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory(prefix="skill-validator-") as temporary:
             skill = write_skill(Path(temporary))
@@ -327,6 +388,43 @@ class NewSkillsToolTests(unittest.TestCase):
             physical, entry = Path("/physical"), Path("/entries/skill")
             self.entry.create_and_publish_posix_entry(physical, entry)
         symlink.assert_called_once_with(str(physical), str(entry), target_is_directory=True)
+
+    def test_system_install_inspect_and_authorized_creation_dispatch(self) -> None:
+        """系统级显式目标继续走 inspect/ensure,仅模拟创建原语,不建立真实链接."""
+        with tempfile.TemporaryDirectory(prefix="system-entry-") as temporary:
+            root = Path(temporary)
+            physical = write_skill(root / "system-skills")
+            usage = root / "discovery"
+            usage.mkdir()
+            entry = usage / physical.name
+            arguments = ["--physical-dir", str(physical), "--entry-dir", str(entry)]
+            with mock.patch.object(self.entry, "create_entry", return_value="simulated") as create:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(0, self.entry.main(["inspect", *arguments]))
+                    create.assert_not_called()
+                    self.assertEqual(0, self.entry.main(["ensure", *arguments, "--authorized"]))
+                create.assert_called_once_with(physical.resolve(), entry)
+            self.assertFalse(entry.exists())
+
+    def test_project_entry_without_promotion_authorization_cannot_be_created(self) -> None:
+        """工具授权门拒绝无 --authorized 的调用,不模拟 Agent 的作用域决策."""
+        with tempfile.TemporaryDirectory(prefix="project-no-promotion-") as temporary:
+            root = Path(temporary)
+            physical = write_skill(root / "project" / "skills")
+            usage = root / "discovery"
+            usage.mkdir()
+            before = {path: path.read_bytes() for path in physical.rglob("*") if path.is_file()}
+            with mock.patch.object(self.entry, "create_entry") as create:
+                with contextlib.redirect_stderr(io.StringIO()) as errors:
+                    result = self.entry.main([
+                        "ensure", "--physical-dir", str(physical),
+                        "--entry-dir", str(usage / physical.name),
+                    ])
+                self.assertEqual(2, result)
+                self.assertIn("ensure requires --authorized", errors.getvalue())
+                create.assert_not_called()
+            self.assertEqual([], list(usage.iterdir()))
+            self.assertEqual(before, {path: path.read_bytes() for path in before})
 
     def test_discovery_rejects_symlink_physical_dir_before_resolve_or_create(self) -> None:
         fake_info = mock.Mock(st_mode=stat.S_IFLNK, st_file_attributes=0)

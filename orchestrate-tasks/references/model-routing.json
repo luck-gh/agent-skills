@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "selection_policy": {
     "mapping_role": "advisory_for_automatic_selection",
     "availability_gate": "current_tool_schema",
@@ -11,7 +11,9 @@
     {
       "model_id": "gpt-6-astra",
       "display_name": "GPT-6 Astra",
-      "default_level_id": "L4",
+      "level_ids": [
+        "L4"
+      ],
       "task_profile_ids": [
         "strategic-control",
         "cross-branch-decision",
@@ -26,71 +28,73 @@
       ]
     },
     {
-      "model_id": "gpt-5.6-sol",
-      "display_name": "GPT-5.6 Sol",
-      "default_level_id": "L3",
+      "model_id": "gpt-6.1-sol",
+      "display_name": "GPT-6.1 Sol",
+      "level_ids": [
+        "L2",
+        "L3"
+      ],
       "task_profile_ids": [
         "branch-coordination",
         "dependency-integration",
         "complex-review",
-        "browser-debugging"
+        "browser-debugging",
+        "read-only-code-exploration",
+        "targeted-code-change",
+        "focused-refactor-test",
+        "granular-ui-iteration"
       ],
       "default_reasoning_profile_id": "deep",
       "availability": "schema-gated",
       "source_ids": [
         "runtime-contract",
-        "local-routing-policy"
-      ]
-    },
-    {
-      "model_id": "gpt-5.6-terra",
-      "display_name": "GPT-5.6 Terra",
-      "default_level_id": "L2",
-      "task_profile_ids": [
-        "read-only-code-exploration",
-        "targeted-code-change",
-        "focused-refactor-test",
-        "granular-ui-iteration"
-      ],
-      "default_reasoning_profile_id": "balanced",
-      "availability": "schema-gated",
-      "source_ids": [
-        "runtime-contract",
-        "local-routing-policy"
-      ]
-    },
-    {
-      "model_id": "gpt-5.3-codex-spark",
-      "display_name": "GPT-5.3 Codex Spark",
-      "default_level_id": "L2",
-      "task_profile_ids": [
-        "read-only-code-exploration",
-        "targeted-code-change",
-        "focused-refactor-test",
-        "granular-ui-iteration"
-      ],
-      "default_reasoning_profile_id": "balanced",
-      "availability": "schema-gated",
-      "source_ids": [
         "official-subagent-model-guidance",
         "local-routing-policy"
       ]
     },
     {
-      "model_id": "gpt-5.6-luna",
-      "display_name": "GPT-5.6 Luna",
-      "default_level_id": "L1",
+      "model_id": "gpt-6.1-terra",
+      "display_name": "GPT-6.1 Terra",
+      "level_ids": [
+        "L2"
+      ],
+      "task_profile_ids": [
+        "visual-inspection",
+        "bounded-computer-use",
+        "source-grounded-writing",
+        "targeted-code-change"
+      ],
+      "default_reasoning_profile_id": "balanced",
+      "availability": "schema-gated",
+      "source_ids": [
+        "runtime-contract",
+        "official-model-selection",
+        "local-routing-policy"
+      ]
+    },
+    {
+      "model_id": "gpt-6-luna",
+      "display_name": "GPT-6 Luna",
+      "level_ids": [
+        "L1",
+        "L2"
+      ],
       "task_profile_ids": [
         "bounded-scan",
         "documentation-research",
         "code-mapping",
         "repeatable-validation",
-        "high-volume-clear-work"
+        "high-volume-clear-work",
+        "read-only-code-exploration",
+        "targeted-code-change",
+        "focused-refactor-test",
+        "granular-ui-iteration"
       ],
       "default_reasoning_profile_id": "light",
       "availability": "schema-gated",
       "source_ids": [
         "runtime-contract",
+        "official-subagent-model-guidance",
         "local-routing-policy"
       ]
     }
@@ -105,6 +109,11 @@
       "source_id": "official-subagent-model-guidance",
       "kind": "official-documentation",
       "location": "https://learn.chatgpt.com/docs/agent-configuration/subagents"
+    },
+    {
+      "source_id": "official-model-selection",
+      "kind": "official-documentation",
+      "location": "https://learn.chatgpt.com/docs/model-selection"
     },
     {
       "source_id": "local-routing-policy",
